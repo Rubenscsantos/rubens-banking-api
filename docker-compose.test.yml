@@ -1,21 +1,30 @@
-version: '3'
+version: "3"
+
 services:
   app:
     build:
-      args:
-        MIX_ENV: test
-    command: iex -S mix phx.server
+      context: .
+    volumes:
+      - .:/app
+      - /app/deps
+      - /app/_build
     environment:
-      - MIX_ENV=test
-      - PORT=3000
       - PGUSER=user
       - PGPASSWORD=pass
-      - PGDATABASE=5432
-      - PGPORT=db
-      - PGHOST=banking_api_test
-
+      - PGDATABASE=rubens_banking_api_test
+      - PGPORT=5432
+      - PGHOST=db
+      - MIX_ENV=test
+    depends_on:
+      - db
+    ports:
+      - 4000:4000
+    command: "make db setup"
   db:
+    image: postgres:9.6-alpine
+    ports:
+      - 5432:5432
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
-      - POSTGRES_DB=banking_api_test
+      - POSTGRES_DB=rubens_banking_api_test

@@ -1,5 +1,9 @@
 # Auxiliary commands
 
+.PHONY: down
+down:
+	docker-compose down -v --remove-orphans
+
 .PHONY: mix-deps
 mix-deps:
 	mix deps.get
@@ -20,12 +24,7 @@ setup:
 
 .PHONY: test-shell
 test-shell:
-	docker-compose \
-		-f docker-compose.yml \
-		-f docker-compose.test.yml \
-		build
+	docker-compose -f docker-compose.test.yml build
 
-	docker-compose \
-		-f docker-compose.yml \
-		-f docker-compose.test.yml \
-		run --rm app sh -c "make db && /bin/sh"
+	docker-compose -f docker-compose.test.yml \
+	run --rm app sh -c "make db && /bin/sh"
