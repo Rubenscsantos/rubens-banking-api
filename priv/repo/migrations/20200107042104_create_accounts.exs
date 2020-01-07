@@ -2,8 +2,7 @@ defmodule RubensBankingApi.Repo.Migrations.CreateAccounts do
   use Ecto.Migration
 
   def change do
-    create table(:boleto_payments, primary_key: false) do
-      add(:id, :uuid, primary_key: true)
+    create table(:accounts, primary_key: true) do
       add(:account_id, :string)
       add(:amount, :integer)
       add(:document_type, :string)
@@ -11,5 +10,6 @@ defmodule RubensBankingApi.Repo.Migrations.CreateAccounts do
       add(:status, :string)
 
       timestamps()
+    end
   end
 end

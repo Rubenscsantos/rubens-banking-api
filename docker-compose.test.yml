@@ -1,0 +1,21 @@
+version: '3'
+services:
+  app:
+    build:
+      args:
+        MIX_ENV: test
+    command: iex -S mix phx.server
+    environment:
+      - MIX_ENV=test
+      - PORT=3000
+      - PGUSER=user
+      - PGPASSWORD=pass
+      - PGDATABASE=5432
+      - PGPORT=db
+      - PGHOST=banking_api_test
+
+  db:
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=banking_api_test
