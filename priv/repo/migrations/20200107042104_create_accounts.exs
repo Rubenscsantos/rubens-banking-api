@@ -11,5 +11,6 @@ defmodule RubensBankingApi.Repo.Migrations.CreateAccounts do
       add(:status, :string)
 
       timestamps()
+    end
   end
 end
