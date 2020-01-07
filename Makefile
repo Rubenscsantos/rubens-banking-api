@@ -12,7 +12,4 @@ wait-db:
 .PHONY: db
 db: mix-deps wait-db
 	mix do ecto.create, ecto.migrate
-
-.PHONY: run-debug
-run-debug:
-	iex -S mix phx.server
+	

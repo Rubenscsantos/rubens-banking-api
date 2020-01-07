@@ -1,10 +1,8 @@
 FROM elixir:1.9.4-alpine
 
-WORKDIR app
+WORKDIR /app
 
-COPY mix.exs .
-COPY mix.lock .
-COPY VERSION .
+COPY . /app
 
 RUN apk add --update postgresql-client make tzdata git inotify-tools
 
