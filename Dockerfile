@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . /app
 
-RUN apk add --update postgresql-client make tzdata git inotify-tools
+RUN apk add --update postgresql-client make tzdata git inotify-tools npm
 
 ARG MIX_ENV=dev
 ENV MIX_ENV=$MIX_ENV

@@ -12,4 +12,8 @@ wait-db:
 .PHONY: db
 db: mix-deps wait-db
 	mix do ecto.create, ecto.migrate
-	
+
+.PHONY: setup
+setup:
+	npm install -C assets/
+	mix phx.server
