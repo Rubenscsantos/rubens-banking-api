@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+    volumes:
+      - .:/app
+      - /app/deps
+      - /app/_build
+    environment:
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=rubens_banking
+      - PGPORT=5432
+      - PGHOST=db
+    depends_on:
+      - db
+    ports:
+      - 4000:4000
+    command: "make db setup"
+  db:
+    image: postgres:9.6-alpine
+    ports:
+      - 5432:5432
