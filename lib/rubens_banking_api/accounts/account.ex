@@ -4,8 +4,6 @@ defmodule RubensBankingApi.Accounts.Account do
   use Ecto.Schema
   import Ecto.Changeset
 
-  # @primary_key {:id, :binary_id, autogenerate: true}
-
   schema "accounts" do
     field(:balance, :integer)
     field(:owner_name, :string)
