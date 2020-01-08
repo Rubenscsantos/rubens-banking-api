@@ -4,7 +4,8 @@ defmodule RubensBankingApi.Repo.Migrations.CreateAccounts do
   def change do
     create table(:accounts, primary_key: true) do
       add(:account_id, :string)
-      add(:amount, :integer)
+      add(:balance, :integer)
+      add(:owner_name, :string)
       add(:document_type, :string)
       add(:document, :string)
       add(:status, :string)

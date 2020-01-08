@@ -14,8 +14,7 @@ config :rubens_banking_api, RubensBankingApiWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "qkyGD+9gJ+rjfVSR4sFh8pX0BzqaUXEB6tnmtOmvrMvtJoxdiiyNo8XsMwCn2DFi",
   render_errors: [view: RubensBankingApiWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: RubensBankingApi.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: RubensBankingApi.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -24,4 +23,4 @@ config :logger, :console,
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

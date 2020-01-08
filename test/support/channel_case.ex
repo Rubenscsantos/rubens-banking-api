@@ -25,13 +25,13 @@ defmodule RubensBankingApiWeb.ChannelCase do
     end
   end
 
-
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(RubensBankingApi.Repo)
+
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(RubensBankingApi.Repo, {:shared, self()})
     end
+
     :ok
   end
-
 end
