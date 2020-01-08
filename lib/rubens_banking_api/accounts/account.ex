@@ -4,8 +4,9 @@ defmodule RubensBankingApi.Accounts.Account do
   use Ecto.Schema
   import Ecto.Changeset
 
+  # @primary_key {:id, :binary_id, autogenerate: true}
+
   schema "accounts" do
-    field(:account_id, :string)
     field(:balance, :integer)
     field(:owner_name, :string)
     field(:document_type, :string)
@@ -18,14 +19,13 @@ defmodule RubensBankingApi.Accounts.Account do
   def create_account(account, attrs) do
     account
     |> cast(attrs, [
-      :account_id,
       :balance,
       :document_type,
       :document,
       :status,
       :owner_name
     ])
-    |> validate_required([:document, :document_type, :owner_name, :account_id, :balance, :status])
+    |> validate_required([:document, :document_type, :owner_name, :balance, :status])
     |> validate_number(:balance, equal_to: 100_000)
     |> validate_inclusion(:status, ["open"])
   end

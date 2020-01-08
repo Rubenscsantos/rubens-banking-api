@@ -6,7 +6,6 @@ defmodule RubensBankingApi.AccountFactory do
 
       def account_factory do
         %Account{
-          account_id: Enum.random(1..100_000) |> Integer.to_string(),
           balance: 100_000,
           owner_name: "Rubens",
           document_type: "RG",

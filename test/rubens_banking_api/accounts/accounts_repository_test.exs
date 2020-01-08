@@ -9,7 +9,6 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
         balance: 100_000,
         document: "1234554321",
         document_type: "RG",
-        account_id: "1",
         owner_name: "Bjork",
         status: "open"
       }
@@ -18,11 +17,11 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
 
       assert {:ok, %Account{}} = AccountsRepository.create(new_account)
 
-      refute is_nil(Repo.all(Account))
+      refute Enum.empty?(Repo.all(Account))
     end
 
     test "returns error when required fields are missing" do
-      new_account = %{account_id: Enum.random(1..100_000)}
+      new_account = %{}
 
       assert {:error,
               %Ecto.Changeset{
@@ -31,8 +30,7 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
                   document_type: {"can't be blank", [validation: :required]},
                   owner_name: {"can't be blank", [validation: :required]},
                   balance: {"can't be blank", [validation: :required]},
-                  status: {"can't be blank", [validation: :required]},
-                  account_id: {"is invalid", [type: :string, validation: :cast]}
+                  status: {"can't be blank", [validation: :required]}
                 ],
                 valid?: false
               }} = AccountsRepository.create(new_account)
@@ -45,7 +43,6 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
         balance: 10,
         document: "1234554321",
         document_type: "RG",
-        account_id: "1",
         owner_name: "Tom",
         status: "open"
       }
@@ -64,7 +61,6 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
         balance: 100_000,
         document: "1234554321",
         document_type: "RG",
-        account_id: "1",
         owner_name: "Tom",
         status: "closed"
       }
@@ -74,6 +70,28 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
                 errors: [status: {"is invalid", [validation: :inclusion]}],
                 valid?: false
               }} = AccountsRepository.create(new_account)
+    end
+  end
+
+  describe "get/1" do
+    test "successfully returns an account" do
+      %{id: account_id} = account = insert(:account)
+
+      assert {:ok, account} == AccountsRepository.get(account_id)
+    end
+
+    test "returns :account_not_found if there is no account with given id" do
+      assert {:ok, :account_not_found} == AccountsRepository.get(1)
+    end
+  end
+
+  describe "get_all/0" do
+    test "returns all accounts present in database" do
+      assert [] = AccountsRepository.get_all()
+
+      insert(:account)
+
+      refute Enum.empty?(AccountsRepository.get_all())
     end
   end
 

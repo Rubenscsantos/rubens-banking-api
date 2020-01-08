@@ -2,8 +2,7 @@ defmodule RubensBankingApi.Repo.Migrations.CreateAccounts do
   use Ecto.Migration
 
   def change do
-    create table(:accounts, primary_key: true) do
-      add(:account_id, :string)
+    create table(:accounts) do
       add(:balance, :integer)
       add(:owner_name, :string)
       add(:document_type, :string)
