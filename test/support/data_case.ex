@@ -22,6 +22,7 @@ defmodule RubensBankingApi.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import RubensBankingApi.DataCase
+      import RubensBankingApi.Factory
     end
   end
 

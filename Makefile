@@ -1,5 +1,9 @@
 # Auxiliary commands
 
+.PHONY: down
+down:
+	docker-compose down -v --remove-orphans
+
 .PHONY: mix-deps
 mix-deps:
 	mix deps.get
@@ -17,3 +21,10 @@ db: mix-deps wait-db
 setup:
 	npm install -C assets/
 	mix phx.server
+
+.PHONY: test-shell
+test-shell:
+	docker-compose -f docker-compose.test.yml build
+
+	docker-compose -f docker-compose.test.yml \
+	run --rm app sh -c "make db && /bin/sh"

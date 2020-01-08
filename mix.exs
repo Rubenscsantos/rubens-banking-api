@@ -6,9 +6,9 @@ defmodule RubensBankingApi.Mixfile do
       app: :rubens_banking_api,
       version: "0.0.1",
       elixir: "~> 1.4",
-      elixirc_paths: elixirc_paths(Mix.env),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers,
-      start_permanent: Mix.env == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
     ]
@@ -26,7 +26,7 @@ defmodule RubensBankingApi.Mixfile do
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
   #
@@ -39,6 +39,7 @@ defmodule RubensBankingApi.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 2.10"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
+      {:ex_machina, "~> 2.3", only: :test},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:plug_cowboy, "~> 1.0"}

@@ -11,7 +11,7 @@ defmodule RubensBankingApi.Application do
       # Start the Ecto repository
       supervisor(RubensBankingApi.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(RubensBankingApiWeb.Endpoint, []),
+      supervisor(RubensBankingApiWeb.Endpoint, [])
       # Start your own worker by calling: RubensBankingApi.Worker.start_link(arg1, arg2, arg3)
       # worker(RubensBankingApi.Worker, [arg1, arg2, arg3]),
     ]
