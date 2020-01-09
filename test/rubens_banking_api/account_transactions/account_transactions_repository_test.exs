@@ -99,4 +99,9 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
       refute Enum.empty?(Repo.all(AccountTransaction))
     end
   end
+
+  describe "generate_report/?" do
+    test "successfully returns a list of all transactions in the last day" do
+    end
+  end
 end
