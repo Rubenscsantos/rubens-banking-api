@@ -1,6 +1,6 @@
-defmodule RubensBankingApi.Factory do
+defmodule RubensBankingApi.Factories.Factory do
   @moduledoc false
   use ExMachina.Ecto, repo: RubensBankingApi.Repo
-  use RubensBankingApi.AccountFactory
-  use RubensBankingApi.AccountTransactionFactory
+  use RubensBankingApi.Factories.AccountFactory
+  use RubensBankingApi.Factories.AccountTransactionFactory
 end
