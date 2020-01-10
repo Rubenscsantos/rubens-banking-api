@@ -6,6 +6,8 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
 
   @transaction_types ["open_account", "close_account", "transfer_money", "withdraw"]
 
+  @primary_key {:id, :binary_id, autogenerate: true}
+
   schema "account_transactions" do
     field(:transaction_starter_account_id, :integer)
     field(:receiver_account_id, :integer)
