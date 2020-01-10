@@ -219,7 +219,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
   end
 
   describe "generate_report/2 for all time" do
-    test "successfullt return a list of all transactions done by an account in the last day" do
+    test "successfullt return a list of all transactions done by an account" do
       account_id = Enum.random(1..100_000)
       now = NaiveDateTime.utc_now()
 
@@ -317,8 +317,8 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
   end
 
   defp next_day(now), do: now |> NaiveDateTime.add(@seconds_in_day, :second)
-  defp next_week(now), do: now |> NaiveDateTime.add(@seconds_in_week, :second) |> next_day()
-  defp next_month(now), do: now |> Map.put(:month, now.month + 1) |> next_day()
-  defp next_year(now), do: now |> Map.put(:year, now.year + 1) |> next_day()
-  defp two_years_from_now(now), do: now |> Map.put(:year, now.year + 2) |> next_day()
+  defp next_week(now), do: now |> NaiveDateTime.add(@seconds_in_week, :second)
+  defp next_month(now), do: now |> Map.put(:month, now.month + 1)
+  defp next_year(now), do: now |> Map.put(:year, now.year + 1)
+  defp two_years_from_now(now), do: now |> Map.put(:year, now.year + 2)
 end
