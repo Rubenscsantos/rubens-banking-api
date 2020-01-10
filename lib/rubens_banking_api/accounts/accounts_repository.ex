@@ -15,7 +15,7 @@ defmodule RubensBankingApi.Accounts.AccountsRepository do
     query = from(a in Account, where: a.id == ^id)
 
     case Repo.one(query) do
-      nil -> {:ok, :account_not_found}
+      nil -> {:error, :account_not_found}
       account -> {:ok, account}
     end
   end

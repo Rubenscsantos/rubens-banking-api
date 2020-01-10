@@ -80,8 +80,8 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
       assert {:ok, account} == AccountsRepository.get(account_id)
     end
 
-    test "returns :account_not_found if there is no account with given id" do
-      assert {:ok, :account_not_found} == AccountsRepository.get(1)
+    test "returns `{:error, :account_not_found}` if there is no account with given id" do
+      assert {:error, :account_not_found} == AccountsRepository.get(1)
     end
   end
 
