@@ -1,4 +1,7 @@
 defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
+  @moduledoc """
+    Repository module to access the account_transactions database
+  """
   alias RubensBankingApi.AccountTransactions.AccountTransaction
   alias RubensBankingApi.Repo
 

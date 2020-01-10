@@ -1,4 +1,7 @@
 defmodule RubensBankingApi.Accounts.AccountsRepository do
+  @moduledoc """
+    Repository module to access the accounts database
+  """
   alias RubensBankingApi.Accounts.Account
   alias RubensBankingApi.Repo
 
@@ -21,7 +24,7 @@ defmodule RubensBankingApi.Accounts.AccountsRepository do
   end
 
   @spec get_all() :: list(%Account{})
-  def get_all() do
+  def get_all do
     Repo.all(Account)
   end
 

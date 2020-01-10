@@ -39,6 +39,7 @@ defmodule RubensBankingApi.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 2.10"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
+      {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:ex_machina, "~> 2.3", only: :test},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
