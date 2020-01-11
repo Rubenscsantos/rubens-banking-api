@@ -8,7 +8,7 @@ defmodule RubensBankingApi.Factories.AccountTransactionFactory do
         %AccountTransaction{
           transaction_starter_account_id: Enum.random(1..100_000),
           receiver_account_id: Enum.random(1..100_000),
-          transaction_type: "transfer_money",
+          transaction_type: "transfer money",
           amount: Enum.random(1..500_000)
         }
       end

@@ -116,6 +116,13 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
                 valid?: false
               }} = AccountsRepository.update_account_balance(account, %{balance: -1})
     end
+
+    test "returns error in case account is already closed" do
+      account = insert(:account, status: "closed")
+
+      assert {:error, :cannot_update_closed_account} ==
+               AccountsRepository.update_account_balance(account, %{})
+    end
   end
 
   describe "close_account/1" do
@@ -123,6 +130,11 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
       account = insert(:account)
 
       assert {:ok, %Account{status: "closed"}} = AccountsRepository.close_account(account)
+    end
+
+    test "returns error in case account is already closed" do
+      account = insert(:account, status: "closed")
+      assert {:error, :account_is_already_closed} == AccountsRepository.close_account(account)
     end
   end
 end
