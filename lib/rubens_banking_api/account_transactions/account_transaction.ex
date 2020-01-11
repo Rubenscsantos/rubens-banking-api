@@ -4,7 +4,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @transaction_types ["open_account", "close_account", "transfer_money", "withdraw"]
+  @transaction_types ["open account", "close account", "transfer money", "withdraw"]
 
   @primary_key {:id, :binary_id, autogenerate: true}
 
@@ -29,19 +29,19 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
     |> validate_requirements(Map.get(attrs, :transaction_type))
   end
 
-  defp validate_requirements(changeset, "open_account") do
+  defp validate_requirements(changeset, "open account") do
     changeset
     |> validate_required([:transaction_starter_account_id, :amount])
     |> validate_transaction_type()
   end
 
-  defp validate_requirements(changeset, "close_account") do
+  defp validate_requirements(changeset, "close account") do
     changeset
     |> validate_required([:transaction_starter_account_id])
     |> validate_transaction_type()
   end
 
-  defp validate_requirements(changeset, "transfer_money") do
+  defp validate_requirements(changeset, "transfer money") do
     changeset
     |> validate_required([
       :transaction_starter_account_id,

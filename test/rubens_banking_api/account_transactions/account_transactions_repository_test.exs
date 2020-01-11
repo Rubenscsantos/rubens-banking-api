@@ -33,11 +33,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
     end
   end
 
-  describe "create/1 when transaction_type = 'open_account'" do
+  describe "create/1 when transaction_type = 'open account'" do
     test "successfully creates an account transaction" do
       params = %{
         transaction_starter_account_id: Enum.random(1..100_000),
-        transaction_type: "open_account",
+        transaction_type: "open account",
         amount: 100_000
       }
 
@@ -53,7 +53,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
     test "successfully creates an account transaction" do
       params = %{
         transaction_starter_account_id: Enum.random(1..100_000),
-        transaction_type: "close_account"
+        transaction_type: "close account"
       }
 
       assert [] == Repo.all(AccountTransaction)
@@ -69,7 +69,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
       params = %{
         transaction_starter_account_id: Enum.random(1..100_000),
         receiver_account_id: Enum.random(1..100_000),
-        transaction_type: "transfer_money",
+        transaction_type: "transfer money",
         amount: Enum.random(1..500_000)
       }
 
@@ -127,11 +127,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
               [
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 },
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 }
               ]} = AccountTransactionsRepository.generate_report(account_id, :day)
     end
@@ -154,11 +154,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
               [
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 },
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 }
               ]} = AccountTransactionsRepository.generate_report(account_id, :week)
     end
@@ -181,11 +181,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
               [
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 },
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 }
               ]} = AccountTransactionsRepository.generate_report(account_id, :month)
     end
@@ -208,11 +208,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
               [
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 },
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 }
               ]} = AccountTransactionsRepository.generate_report(account_id, :year)
     end
@@ -235,11 +235,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
               [
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 },
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 },
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
@@ -260,15 +260,15 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
               [
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 },
                 %AccountTransaction{
                   transaction_starter_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 },
                 %AccountTransaction{
                   receiver_account_id: ^account_id,
-                  transaction_type: "transfer_money"
+                  transaction_type: "transfer money"
                 }
               ]} = AccountTransactionsRepository.generate_report(account_id, :total)
     end
@@ -278,17 +278,17 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
       insert(:account_transaction,
         transaction_starter_account_id: account_id,
-        transaction_type: "open_account"
+        transaction_type: "open account"
       )
 
       insert(:account_transaction,
         transaction_starter_account_id: account_id,
-        transaction_type: "close_account"
+        transaction_type: "close account"
       )
 
       insert(:account_transaction,
         transaction_starter_account_id: account_id,
-        transaction_type: "transfer_money"
+        transaction_type: "transfer money"
       )
 
       insert(:account_transaction,
@@ -298,9 +298,9 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
       assert {:ok,
               [
-                %AccountTransaction{transaction_type: "open_account"},
-                %AccountTransaction{transaction_type: "close_account"},
-                %AccountTransaction{transaction_type: "transfer_money"},
+                %AccountTransaction{transaction_type: "open account"},
+                %AccountTransaction{transaction_type: "close account"},
+                %AccountTransaction{transaction_type: "transfer money"},
                 %AccountTransaction{transaction_type: "withdraw"}
               ]} = AccountTransactionsRepository.generate_report(account_id, :total)
     end
