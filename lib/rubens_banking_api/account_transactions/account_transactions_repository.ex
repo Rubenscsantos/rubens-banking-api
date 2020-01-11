@@ -1,4 +1,7 @@
 defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
+  @moduledoc """
+    Repository module to access the account_transactions database
+  """
   alias RubensBankingApi.AccountTransactions.AccountTransaction
   alias RubensBankingApi.Repo
 
@@ -25,9 +28,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
   @spec generate_report(account_id :: String.t(), atom()) :: List.t(AccountTransaction.t())
   def generate_report(account_id, report_duration)
       when report_duration in [:day, :week, :month, :year, :total] do
-    date = Date.utc_today()
+    today = Date.utc_today()
 
-    generate_query(account_id, date, report_duration)
+    today
+    |> generate_end_of_report_period(report_duration)
+    |> generate_query(account_id, today)
     |> Repo.all()
     |> case do
       [] -> {:ok, []}
@@ -37,54 +42,26 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
 
   def generate_report(_account_id, _report_duration), do: {:error, :invalid_report_duration}
 
-  defp generate_query(account_id, date, :day) do
-    from(a in AccountTransaction,
-      where:
-        a.transaction_starter_account_id == ^account_id or a.receiver_account_id == ^account_id,
-      where: fragment("?::date", a.inserted_at) == ^date
-    )
-  end
+  defp generate_end_of_report_period(today, :day), do: Date.add(today, 1)
+  defp generate_end_of_report_period(today, :week), do: Date.add(today, 7)
+  defp generate_end_of_report_period(today, :month), do: Date.add(today, 30)
+  defp generate_end_of_report_period(today, :year), do: Date.add(today, 365)
+  defp generate_end_of_report_period(_today, :total), do: :total
 
-  defp generate_query(account_id, date, :week) do
-    a_week_from_today = Date.add(date, 7)
-
-    from(a in AccountTransaction,
-      where:
-        a.transaction_starter_account_id == ^account_id or a.receiver_account_id == ^account_id,
-      where:
-        fragment("?::date", a.inserted_at) >= ^date and
-          fragment("?::date", a.inserted_at) <= ^a_week_from_today
-    )
-  end
-
-  defp generate_query(account_id, date, :month) do
-    a_month_from_today = Date.add(date, 30)
-
-    from(a in AccountTransaction,
-      where:
-        a.transaction_starter_account_id == ^account_id or a.receiver_account_id == ^account_id,
-      where:
-        fragment("?::date", a.inserted_at) >= ^date and
-          fragment("?::date", a.inserted_at) <= ^a_month_from_today
-    )
-  end
-
-  defp generate_query(account_id, date, :year) do
-    a_year_from_today = Date.add(date, 365)
-
-    from(a in AccountTransaction,
-      where:
-        a.transaction_starter_account_id == ^account_id or a.receiver_account_id == ^account_id,
-      where:
-        fragment("?::date", a.inserted_at) >= ^date and
-          fragment("?::date", a.inserted_at) <= ^a_year_from_today
-    )
-  end
-
-  defp generate_query(account_id, _date, :total) do
+  defp generate_query(:total, account_id, _today) do
     from(a in AccountTransaction,
       where:
         a.transaction_starter_account_id == ^account_id or a.receiver_account_id == ^account_id
+    )
+  end
+
+  defp generate_query(end_of_report_period, account_id, today) do
+    from(a in AccountTransaction,
+      where:
+        a.transaction_starter_account_id == ^account_id or a.receiver_account_id == ^account_id,
+      where:
+        fragment("?::date", a.inserted_at) >= ^today and
+          fragment("?::date", a.inserted_at) < ^end_of_report_period
     )
   end
 end

@@ -8,6 +8,7 @@ defmodule RubensBankingApi.Mixfile do
       elixir: "~> 1.4",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      test_coverage: [tool: ExCoveralls],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -39,7 +40,9 @@ defmodule RubensBankingApi.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 2.10"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
+      {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:ex_machina, "~> 2.3", only: :test},
+      {:excoveralls, "~> 0.12", only: :test},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:plug_cowboy, "~> 1.0"}

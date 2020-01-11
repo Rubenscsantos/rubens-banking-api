@@ -29,8 +29,6 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
     |> validate_requirements(Map.get(attrs, :transaction_type))
   end
 
-  # def changeset(_account_transaction, _attrs), do: {:error, :transaction_type_missing}
-
   defp validate_requirements(changeset, "open_account") do
     changeset
     |> validate_required([:transaction_starter_account_id, :amount])
