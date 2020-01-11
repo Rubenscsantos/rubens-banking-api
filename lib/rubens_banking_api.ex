@@ -16,11 +16,12 @@ defmodule RubensBankingApi do
   alias Ecto.Multi
 
   def create_new_account(
-        %{document: _document, document_type: _document_type, owner_name: _owner_name} = params
+        %{"document" => _document, "document_type" => _document_type, "owner_name" => _owner_name} =
+          params
       ) do
     Multi.new()
     |> Multi.run(:generate_new_account_params, fn _changes ->
-      new_account_params = params |> Map.put(:status, "open") |> Map.put(:balance, 100_000)
+      new_account_params = params |> Map.put("status", "open") |> Map.put("balance", 100_000)
       {:ok, new_account_params}
     end)
     |> Multi.run(:create_account, fn %{generate_new_account_params: new_account_params} ->
@@ -65,17 +66,22 @@ defmodule RubensBankingApi do
     {:error, :missing_parameters}
   end
 
-  def transfer_money(%{amount: amount}) when not is_integer(amount) do
-    Logger.error("Failed to transfer money due to transfer amount not being an integer")
-    {:error, :amount_is_not_integer}
-  end
-
   def transfer_money(%{
-        transaction_starter_account_id: transaction_starter_account_id,
-        receiver_account_id: receiver_account_id,
-        amount: amount
+        "transaction_starter_account_id" => transaction_starter_account_id,
+        "receiver_account_id" => receiver_account_id,
+        "amount" => amount
       }) do
     Multi.new()
+    |> Multi.run(:check_amount, fn _changes ->
+      case Integer.parse(amount) do
+        :error ->
+          Logger.error("Failed to transfer money due to amount not being an integer")
+          {:error, :amount_is_not_integer}
+
+        {amount, _base} ->
+          {:ok, amount}
+      end
+    end)
     |> Multi.run(:get_transaction_starter_account, fn _changes ->
       AccountsRepository.get(transaction_starter_account_id)
     end)
@@ -84,13 +90,15 @@ defmodule RubensBankingApi do
     end)
     |> Multi.run(:update_transaction_starter_balance, fn %{
                                                            get_transaction_starter_account:
-                                                             %{balance: balance} = account
+                                                             %{balance: balance} = account,
+                                                           check_amount: amount
                                                          } ->
       AccountsRepository.update_account_balance(account, %{balance: balance - amount})
     end)
     |> Multi.run(:update_receiver_balance, fn %{
                                                 get_receiver_account:
-                                                  %{balance: balance} = account
+                                                  %{balance: balance} = account,
+                                                check_amount: amount
                                               } ->
       AccountsRepository.update_account_balance(account, %{balance: balance + amount})
     end)
@@ -146,17 +154,25 @@ defmodule RubensBankingApi do
     {:error, :missing_parameters}
   end
 
-  def withdraw(%{amount: amount}) when not is_integer(amount) do
-    Logger.error("Failed to withdraw due to amount not being an integer")
-    {:error, :amount_is_not_integer}
-  end
-
-  def withdraw(%{account_id: account_id, amount: amount}) do
+  def withdraw(%{"account_id" => account_id, "amount" => amount}) do
     Multi.new()
+    |> Multi.run(:check_amount, fn _changes ->
+      case Integer.parse(amount) do
+        :error ->
+          Logger.error("Failed to withdraw due to amount not being an integer")
+          {:error, :amount_is_not_integer}
+
+        {amount, _base} ->
+          {:ok, amount}
+      end
+    end)
     |> Multi.run(:get_account, fn _changes ->
       AccountsRepository.get(account_id)
     end)
-    |> Multi.run(:update_account, fn %{get_account: %{balance: balance} = account} ->
+    |> Multi.run(:update_account, fn %{
+                                       get_account: %{balance: balance} = account,
+                                       check_amount: amount
+                                     } ->
       AccountsRepository.update_account_balance(account, %{balance: balance - amount})
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
@@ -181,12 +197,11 @@ defmodule RubensBankingApi do
     |> case do
       {:ok,
        %{
-         create_withdraw_account_transaction: account_transaction,
-         get_account: %{owner_name: account_owner_name}
+         update_account: %{owner_name: account_owner_name} = account
        }} ->
         Logger.info("Successfully withdrew #{amount} from #{account_owner_name}'s account")
 
-        {:ok, account_transaction}
+        {:ok, account}
 
       {:error, operation_identifier, reason, _changes} ->
         Logger.error("Failed to withdraw in #{operation_identifier}",
@@ -197,7 +212,12 @@ defmodule RubensBankingApi do
     end
   end
 
-  def close_account(%{account_id: account_id}) do
+  def withdraw(_params) do
+    Logger.error("Failed to withdraw due to missing parameters")
+    {:error, :missing_parameters}
+  end
+
+  def close_account(%{"account_id" => account_id}) do
     Multi.new()
     |> Multi.run(:get_account, fn _changes ->
       AccountsRepository.get(account_id)
@@ -218,12 +238,11 @@ defmodule RubensBankingApi do
     |> case do
       {:ok,
        %{
-         create_close_account_account_transaction: account_transaction,
-         get_account: %{owner_name: account_owner_name}
+         close_account: account
        }} ->
-        Logger.info("Successfully closed #{account_owner_name}'s account")
+        Logger.info("Successfully closed #{account.owner_name}'s account")
 
-        {:ok, account_transaction}
+        {:ok, account}
 
       {:error, operation_identifier, reason, _changes} ->
         Logger.error("Failed to close account in #{operation_identifier}",
@@ -232,5 +251,10 @@ defmodule RubensBankingApi do
 
         {:error, reason}
     end
+  end
+
+  def close_account(_params) do
+    Logger.error("Failed to close account due to missing parameters")
+    {:error, :missing_parameters}
   end
 end

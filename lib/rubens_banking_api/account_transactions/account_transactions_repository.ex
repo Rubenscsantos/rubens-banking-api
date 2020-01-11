@@ -26,12 +26,12 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
   end
 
   @spec generate_report(account_id :: String.t(), atom()) :: List.t(AccountTransaction.t())
-  def generate_report(account_id, report_duration)
-      when report_duration in [:day, :week, :month, :year, :total] do
+  def generate_report(account_id, report_period)
+      when report_period in [:day, :week, :month, :year, :total] do
     today = Date.utc_today()
 
     today
-    |> generate_end_of_report_period(report_duration)
+    |> generate_end_of_report_period(report_period)
     |> generate_query(account_id, today)
     |> Repo.all()
     |> case do
@@ -40,7 +40,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
     end
   end
 
-  def generate_report(_account_id, _report_duration), do: {:error, :invalid_report_duration}
+  def generate_report(_account_id, _report_period), do: {:error, :invalid_report_period}
 
   defp generate_end_of_report_period(today, :day), do: Date.add(today, 1)
   defp generate_end_of_report_period(today, :week), do: Date.add(today, 7)

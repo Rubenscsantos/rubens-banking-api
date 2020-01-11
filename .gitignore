@@ -3,6 +3,7 @@
 /db
 /deps
 /*.ez
+.elixir_ls
 
 # Generated on crash by the VM
 erl_crash.dump
@@ -25,3 +26,4 @@ npm-debug.log
 # secrets files as long as you replace their contents by environment
 # variables.
 /config/*.secret.exs
+lib/rubens_banking_api.ex

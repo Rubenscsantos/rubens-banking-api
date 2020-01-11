@@ -310,8 +310,8 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
                AccountTransactionsRepository.generate_report(Enum.random(1..100_000), :total)
     end
 
-    test "return `{:error, :invalid_report_duration}` when report_duration is of inexpected value" do
-      assert {:error, :invalid_report_duration} ==
+    test "return `{:error, :invalid_report_period}` when report_duration is of inexpected value" do
+      assert {:error, :invalid_report_period} ==
                AccountTransactionsRepository.generate_report("", :trimester)
     end
   end
