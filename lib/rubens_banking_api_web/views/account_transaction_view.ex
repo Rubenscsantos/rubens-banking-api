@@ -1,7 +1,7 @@
 defmodule RubensBankingApiWeb.AccountTransactionView do
   use RubensBankingApiWeb, :view
 
-  import RubensBankingApi.MoneyHelper
+  import RubensBankingApi.Helpers.MoneyHelper
 
   def render("show.json", %{account_transaction: account_transactions})
       when is_list(account_transactions) do

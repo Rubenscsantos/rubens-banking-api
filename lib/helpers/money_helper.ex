@@ -1,4 +1,4 @@
-defmodule RubensBankingApi.MoneyHelper do
+defmodule RubensBankingApi.Helpers.MoneyHelper do
   @moduledoc """
     This module helps when displaying amounts for the user to see
   """

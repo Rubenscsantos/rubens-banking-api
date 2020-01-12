@@ -1,7 +1,7 @@
 defmodule RubensBankingApiWeb.AccountView do
   use RubensBankingApiWeb, :view
 
-  import RubensBankingApi.MoneyHelper
+  import RubensBankingApi.Helpers.MoneyHelper
 
   def render("show.json", %{account: account}) do
     %{data: render("account.json", %{account: account})}

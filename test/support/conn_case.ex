@@ -23,6 +23,8 @@ defmodule RubensBankingApiWeb.ConnCase do
       use Phoenix.ConnTest
       import RubensBankingApiWeb.Router.Helpers
 
+      alias RubensBankingApi.Helpers.MoneyHelper
+
       # The default endpoint for testing
       @endpoint RubensBankingApiWeb.Endpoint
     end

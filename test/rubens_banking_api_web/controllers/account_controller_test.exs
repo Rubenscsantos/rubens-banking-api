@@ -38,7 +38,9 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
 
   describe "show/2" do
     test "given an existing id, return the correct account", %{conn: conn} do
-      %{id: account_id} = account = insert(:account)
+      %{id: account_id, balance: balance} = account = insert(:account)
+
+      converted_balance = MoneyHelper.convert_amount(balance)
 
       response =
         conn
@@ -51,12 +53,14 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
                  "document_type" => account.document_type,
                  "id" => account.id,
                  "owner_name" => account.owner_name,
+                 "balance" => converted_balance,
                  "status" => account.status
                }
              } == response
     end
   end
 
+  @moduletag :capture_log
   describe "close_account/2" do
     test "given an existing id, closes an open account", %{conn: conn} do
       %{id: account_id} = insert(:account, status: "open")
@@ -89,53 +93,136 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
              } = response
     end
 
-    # test "returns error when account was already closed", %{conn: conn} do
-    #   %{id: account_id} = insert(:account, status: "closed")
+    test "returns error when account was already closed", %{conn: conn} do
+      %{id: account_id} = insert(:account, status: "closed")
 
-    #   response =
-    #     conn
-    #     |> post(account_path(conn, :close, account_id))
-    #     |> json_response(500)
+      response =
+        conn
+        |> post(account_path(conn, :close, account_id))
+        |> json_response(400)
 
-    #   assert "" == response
-    # end
+      assert %{"errors" => "account_is_already_closed"} == response
+    end
   end
 
-  # describe "withdraw/2" do
-  #   test "successfully withdraws money from account", %{conn: conn} do
-  #     %{id: account_id, balance: balance} = insert(:account)
-  #     # params = %{"account_id" => account_id, "amount" => 25000}
+  describe "withdraw/2" do
+    test "successfully withdraws money from account", %{conn: conn} do
+      %{id: account_id, balance: balance} = insert(:account)
 
-  #     response =
-  #       conn
-  #       |> post(account_path(conn, :withdraw, %{account_id: account_id, amount: 25_000}))
-  #       |> json_response(201)
+      params = %{account_id: account_id, amount: 25_000}
 
-  #     assert %{
-  #              "data" => %{
-  #                "document" => document,
-  #                "document_type" => document_type,
-  #                "id" => ^account_id,
-  #                "owner_name" => owner_name,
-  #                "balance" => amount,
-  #                "status" => status
-  #              }
-  #            } = response
+      response =
+        conn
+        |> post(account_path(conn, :withdraw, params))
+        |> json_response(201)
 
-  #     response = conn |> get(account_path(conn, :show, account_id)) |> json_response(200)
+      assert %{
+               "data" => %{
+                 "document" => document,
+                 "document_type" => document_type,
+                 "id" => ^account_id,
+                 "owner_name" => owner_name,
+                 "balance" => amount,
+                 "status" => status
+               }
+             } = response
 
-  #     assert %{
-  #              "data" => %{
-  #                "document" => ^document,
-  #                "document_type" => ^document_type,
-  #                "id" => ^account_id,
-  #                "owner_name" => ^owner_name,
-  #                "balance" => ^amount,
-  #                "status" => ^status
-  #              }
-  #            } = response
+      response = conn |> get(account_path(conn, :show, account_id)) |> json_response(200)
 
-  #     refute balance == amount
-  #   end
-  # end
+      assert %{
+               "data" => %{
+                 "document" => ^document,
+                 "document_type" => ^document_type,
+                 "id" => ^account_id,
+                 "owner_name" => ^owner_name,
+                 "balance" => ^amount,
+                 "status" => ^status
+               }
+             } = response
+
+      refute balance == amount
+    end
+
+    test "returns error when account was already closed", %{conn: conn} do
+      %{id: account_id} = insert(:account, status: "closed")
+
+      params = %{account_id: account_id, amount: 25_000}
+
+      response =
+        conn
+        |> post(account_path(conn, :withdraw, params))
+        |> json_response(400)
+
+      assert %{"errors" => "cannot_update_closed_account"} == response
+    end
+  end
+
+  describe "transfer_money/2" do
+    test "successfully transfer money from the transaction starter account to the receiver account",
+         %{conn: conn} do
+      %{id: transaction_starter_id} = insert(:account)
+      %{id: receiver_account_id} = insert(:account)
+
+      params = %{
+        transaction_starter_account_id: transaction_starter_id,
+        receiver_account_id: receiver_account_id,
+        amount: 25_000
+      }
+
+      converted_amount = MoneyHelper.convert_amount(25_000)
+
+      response =
+        conn
+        |> post(account_path(conn, :transfer_money, params))
+        |> json_response(201)
+
+      assert %{
+               "data" => %{
+                 "amount" => ^converted_amount,
+                 "receiver_account_id" => ^receiver_account_id,
+                 "transaction_starter_account_id" => ^transaction_starter_id,
+                 "transaction_type" => "transfer money"
+               }
+             } = response
+    end
+
+    @moduletag :capture_log
+    test "returns error when transaction starter account does not have enough money", %{
+      conn: conn
+    } do
+      %{id: transaction_starter_id} = insert(:account, balance: 24_999)
+      %{id: receiver_account_id} = insert(:account)
+
+      params = %{
+        transaction_starter_account_id: transaction_starter_id,
+        receiver_account_id: receiver_account_id,
+        amount: 25_000
+      }
+
+      response =
+        conn
+        |> post(account_path(conn, :transfer_money, params))
+        |> json_response(422)
+
+      assert %{"errors" => %{"balance" => ["must be greater than or equal to 0"]}} == response
+    end
+
+    test "returns error when account was already closed", %{conn: conn} do
+      %{id: transaction_starter_account_id} = insert(:account, status: "closed")
+      %{id: receiver_account_id} = insert(:account)
+
+      params = %{
+        transaction_starter_account_id: transaction_starter_account_id,
+        receiver_account_id: receiver_account_id,
+        amount: 25_000
+      }
+
+      response =
+        conn
+        |> post(account_path(conn, :transfer_money, params))
+        |> json_response(400)
+
+      assert %{"errors" => "cannot_update_closed_account"} == response
+    end
+  end
 end
