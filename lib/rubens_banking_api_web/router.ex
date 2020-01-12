@@ -7,10 +7,6 @@ defmodule RubensBankingApiWeb.Router do
     plug(:accepts, ["json"])
   end
 
-  scope "/" do
-    # get "/docs", OpenApiSpex.Plug.SwaggerUI, path: "/docs/api.yaml"
-  end
-
   scope "/api/v1" do
     pipe_through(:api)
 
