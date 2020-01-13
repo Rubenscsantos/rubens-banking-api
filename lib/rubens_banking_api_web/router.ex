@@ -13,9 +13,11 @@ defmodule RubensBankingApiWeb.Router do
   end
 
   scope "/api/v1" do
-    pipe_through([:api, :api_auth])
+    pipe_through([:api])
 
     scope "/accounts" do
+      pipe_through([:api_auth])
+
       post("/", AccountController, :create)
       get("/:account_id", AccountController, :show)
       post("/:account_id/close", AccountController, :close)
@@ -24,6 +26,8 @@ defmodule RubensBankingApiWeb.Router do
     end
 
     scope "/account_transactions" do
+      pipe_through([:api_auth])
+
       post("/get_report", AccountTransactionController, :get_report)
     end
 
@@ -42,7 +46,7 @@ defmodule RubensBankingApiWeb.Router do
     else
       conn
       |> put_status(:unauthorized)
-      |> put_view(MyAppWeb.ErrorView)
+      |> put_view(RubensBankingApiWeb.ErrorView)
       |> render("401.json", message: "Unauthenticated user")
       |> halt()
     end

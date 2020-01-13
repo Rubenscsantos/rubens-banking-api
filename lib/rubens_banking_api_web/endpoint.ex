@@ -4,6 +4,13 @@ defmodule RubensBankingApiWeb.Endpoint do
   plug(Plug.RequestId)
   plug(Plug.Parsers, parsers: [:json], pass: ["*/*"], json_decoder: Poison)
   plug(Plug.Logger)
+
+  plug(Plug.Session,
+    store: :cookie,
+    key: "_rubens_banking_api_key",
+    signing_salt: "ZOc+gbvY"
+  )
+
   plug(RubensBankingApiWeb.Router)
 
   @doc """

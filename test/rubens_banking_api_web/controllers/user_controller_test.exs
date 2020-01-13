@@ -57,15 +57,11 @@ defmodule RubensBankingApiWeb.UserControllerTest do
       conn =
         post(
           conn,
-          user_path(conn, :sign_in, %{
-            email: current_user.email,
-            password: @current_user_attrs.password
-          }),
+          user_path(conn, :create),
           user: @create_attrs
         )
-        |> IO.inspect()
 
-      assert %{"id" => id} = json_response(conn, 200)["data"]
+      assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get(conn, user_path(conn, :show, id))
 
@@ -76,7 +72,7 @@ defmodule RubensBankingApiWeb.UserControllerTest do
       assert json_response(conn, 200)["data"] == %{
                "id" => id,
                "email" => "some email",
-               "is_active" => true
+               "is_active" => false
              }
     end
 
@@ -132,7 +128,9 @@ defmodule RubensBankingApiWeb.UserControllerTest do
           })
         )
 
-      assert json_response(conn, 200)["data"] == %{
+
+        response = json_response(conn, 200)
+      assert response["data"] == %{
                "user" => %{
                  "id" => current_user.id,
                  "email" => current_user.email

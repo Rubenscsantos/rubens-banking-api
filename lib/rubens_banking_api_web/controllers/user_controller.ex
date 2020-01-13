@@ -21,7 +21,6 @@ defmodule RubensBankingApiWeb.UserController do
   end
 
   def show(conn, %{"id" => id}) do
-    IO.inspect(id, label: "SHOW")
     user = Auth.get_user!(id)
     render(conn, "show.json", user: user)
   end
