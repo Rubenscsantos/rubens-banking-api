@@ -32,13 +32,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
   defp validate_requirements(changeset, "open account") do
     changeset
     |> validate_required([:transaction_starter_account_id, :amount])
-    |> validate_transaction_type()
   end
 
   defp validate_requirements(changeset, "close account") do
     changeset
     |> validate_required([:transaction_starter_account_id])
-    |> validate_transaction_type()
   end
 
   defp validate_requirements(changeset, "transfer money") do
@@ -48,13 +46,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
       :receiver_account_id,
       :amount
     ])
-    |> validate_transaction_type()
   end
 
   defp validate_requirements(changeset, "withdraw") do
     changeset
     |> validate_required([:transaction_starter_account_id, :amount])
-    |> validate_transaction_type()
   end
 
   defp validate_requirements(changeset, _invalid_type),
