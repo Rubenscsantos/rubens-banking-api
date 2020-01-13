@@ -80,7 +80,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"account_id\": \"2\", \n\t\"amount\": \"2500\"\n}",
+							"raw": "{\n\t\"account_id\": \"1\", \n\t\"amount\": \"2500\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -117,7 +117,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"transaction_starter_account_id\": \"2\", \n\t\"receiver_account_id\": \"3\", \n\t\"amount\": \"25000\"\n}",
+							"raw": "{\n\t\"transaction_starter_account_id\": \"2\", \n\t\"receiver_account_id\": \"1\", \n\t\"amount\": \"25000\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

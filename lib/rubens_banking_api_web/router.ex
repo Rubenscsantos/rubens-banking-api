@@ -1,7 +1,7 @@
 defmodule RubensBankingApiWeb.Router do
   use RubensBankingApiWeb, :router
 
-  alias RubensBankingApiWeb.{AccountController, AccountTransactionController}
+  alias RubensBankingApiWeb.{AccountController, AccountTransactionController, UserController}
 
   pipeline :api do
     plug(:accepts, ["json"])
@@ -20,6 +20,10 @@ defmodule RubensBankingApiWeb.Router do
 
     scope "/account_transactions" do
       post("/get_report", AccountTransactionController, :get_report)
+    end
+
+    scope "/users" do
+      resources("/", UserController, except: [:new, :edit])
     end
   end
 end
