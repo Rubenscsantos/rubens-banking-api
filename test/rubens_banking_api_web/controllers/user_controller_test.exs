@@ -4,36 +4,74 @@ defmodule RubensBankingApiWeb.UserControllerTest do
   alias RubensBankingApi.Auth
   alias RubensBankingApi.Auth.User
 
-  @create_attrs %{email: "some email", is_active: true, password: "some password"}
+  alias Plug.Test
+
+  @create_attrs %{email: "some email", password: "some password"}
   @update_attrs %{
     email: "some updated email",
     is_active: false,
     password: "some updated password"
   }
   @invalid_attrs %{email: nil, is_active: nil, password: nil}
+  @current_user_attrs %{
+    email: "some current user email",
+    is_active: true,
+    password: "some current user password"
+  }
 
   def fixture(:user) do
     {:ok, user} = Auth.create_user(@create_attrs)
     user
   end
 
+  def fixture(:current_user) do
+    {:ok, current_user} = Auth.create_user(@current_user_attrs)
+    current_user
+  end
+
   setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
+    {:ok, conn: conn, current_user: current_user} = setup_current_user(conn)
+    {:ok, conn: put_req_header(conn, "accept", "application/json"), current_user: current_user}
   end
 
   describe "index" do
-    test "lists all users", %{conn: conn} do
+    test "lists all users", %{conn: conn, current_user: current_user} do
       conn = get(conn, user_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+
+      assert json_response(conn, 200)["data"] == [
+               %{
+                 "id" => current_user.id,
+                 "email" => current_user.email,
+                 "is_active" => current_user.is_active
+               }
+             ]
     end
   end
 
   describe "create user" do
-    test "renders user when data is valid", %{conn: conn} do
-      conn = post(conn, user_path(conn, :create), user: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+    test "renders user when data is valid", %{conn: conn, current_user: current_user} do
+      conn = get(conn, user_path(conn, :index))
+
+      json_response(conn, 200)["data"]
+
+      conn =
+        post(
+          conn,
+          user_path(conn, :sign_in, %{
+            email: current_user.email,
+            password: @current_user_attrs.password
+          }),
+          user: @create_attrs
+        )
+        |> IO.inspect()
+
+      assert %{"id" => id} = json_response(conn, 200)["data"]
 
       conn = get(conn, user_path(conn, :show, id))
+
+      # conn = conn
+      # |> init_test_session(foo: "bar")
+      # |> delete(session_path(conn, :delete))
 
       assert json_response(conn, 200)["data"] == %{
                "id" => id,
@@ -83,8 +121,42 @@ defmodule RubensBankingApiWeb.UserControllerTest do
     end
   end
 
+  describe "sign_in user" do
+    test "renders user when user credentials are good", %{conn: conn, current_user: current_user} do
+      conn =
+        post(
+          conn,
+          user_path(conn, :sign_in, %{
+            email: current_user.email,
+            password: @current_user_attrs.password
+          })
+        )
+
+      assert json_response(conn, 200)["data"] == %{
+               "user" => %{
+                 "id" => current_user.id,
+                 "email" => current_user.email
+               }
+             }
+    end
+
+    test "renders errors when user credentials are bad", %{conn: conn} do
+      conn = post(conn, user_path(conn, :sign_in, %{email: "non-existent email", password: ""}))
+
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Wrong email or password"}
+    end
+  end
+
   defp create_user(_) do
     user = fixture(:user)
     {:ok, user: user}
+  end
+
+  defp setup_current_user(conn) do
+    current_user = fixture(:current_user)
+
+    {:ok,
+     conn: Test.init_test_session(conn, current_user_id: current_user.id),
+     current_user: current_user}
   end
 end

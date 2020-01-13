@@ -2,7 +2,7 @@ defmodule RubensBankingApiWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :rubens_banking_api
 
   plug(Plug.RequestId)
-  plug(Plug.Parsers, parsers: [:json], pass: ["*/*"], json_decoder: Jason)
+  plug(Plug.Parsers, parsers: [:json], pass: ["*/*"], json_decoder: Poison)
   plug(Plug.Logger)
   plug(RubensBankingApiWeb.Router)
 

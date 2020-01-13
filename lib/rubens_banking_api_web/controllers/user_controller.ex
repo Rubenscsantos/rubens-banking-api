@@ -21,6 +21,7 @@ defmodule RubensBankingApiWeb.UserController do
   end
 
   def show(conn, %{"id" => id}) do
+    IO.inspect(id, label: "SHOW")
     user = Auth.get_user!(id)
     render(conn, "show.json", user: user)
   end
@@ -45,12 +46,14 @@ defmodule RubensBankingApiWeb.UserController do
     case RubensBankingApi.Auth.authenticate_user(email, password) do
       {:ok, user} ->
         conn
+        |> put_session(:current_user_id, user.id)
         |> put_status(:ok)
         |> put_view(RubensBankingApiWeb.UserView)
         |> render("sign_in.json", user: user)
 
       {:error, message} ->
         conn
+        |> delete_session(:current_user_id)
         |> put_status(:unauthorized)
         |> put_view(RubensBankingApiWeb.ErrorView)
         |> render("401.json", message: message)

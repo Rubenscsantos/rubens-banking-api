@@ -3,6 +3,26 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
 
   import RubensBankingApi.Factories.Factory
 
+  alias RubensBankingApi.Auth
+
+  alias Plug.Test
+
+  @current_user_attrs %{
+    email: "some current user email",
+    is_active: true,
+    password: "some current user password"
+  }
+
+  def fixture(:current_user) do
+    {:ok, current_user} = Auth.create_user(@current_user_attrs)
+    current_user
+  end
+
+  setup %{conn: conn} do
+    {:ok, conn: conn, current_user: current_user} = setup_current_user(conn)
+    {:ok, conn: put_req_header(conn, "accept", "application/json"), current_user: current_user}
+  end
+
   describe "get_report/1" do
     test "successfully generates report with one transaction", %{conn: conn} do
       account_transaction_1 =
@@ -119,5 +139,13 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
                ]
              } == response
     end
+  end
+
+  defp setup_current_user(conn) do
+    current_user = fixture(:current_user)
+
+    {:ok,
+     conn: Test.init_test_session(conn, current_user_id: current_user.id),
+     current_user: current_user}
   end
 end
