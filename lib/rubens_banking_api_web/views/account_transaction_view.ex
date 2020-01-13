@@ -12,13 +12,25 @@ defmodule RubensBankingApiWeb.AccountTransactionView do
     %{data: render("account_transaction.json", %{account_transaction: account_transaction})}
   end
 
-  def render("account_transaction.json", %{account_transaction: account_transaction}) do
+  def render("account_transaction.json", %{
+        account_transaction: %{amount: amount} = account_transaction
+      })
+      when not is_nil(amount) do
     %{
       id: account_transaction.id,
       transaction_starter_account_id: account_transaction.transaction_starter_account_id,
       receiver_account_id: account_transaction.receiver_account_id,
       transaction_type: account_transaction.transaction_type,
-      amount: convert_amount(account_transaction.amount)
+      amount: convert_amount(amount)
+    }
+  end
+
+  def render("account_transaction.json", %{account_transaction: account_transaction}) do
+    %{
+      id: account_transaction.id,
+      transaction_starter_account_id: account_transaction.transaction_starter_account_id,
+      receiver_account_id: account_transaction.receiver_account_id,
+      transaction_type: account_transaction.transaction_type
     }
   end
 end

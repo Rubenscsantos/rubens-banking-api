@@ -33,6 +33,34 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
              } == response
     end
 
+    test "successfully generates report when transaction does not have amount", %{conn: conn} do
+      account_transaction_1 =
+        insert(:account_transaction,
+          transaction_starter_account_id: 1500,
+          transaction_type: "close account",
+          amount: nil
+        )
+
+      params = %{account_id: "1500", report_period: "day"}
+
+      response =
+        conn
+        |> post(account_transaction_path(conn, :get_report, params))
+        |> json_response(201)
+
+      assert %{
+               "data" => [
+                 %{
+                   "id" => account_transaction_1.id,
+                   "receiver_account_id" => account_transaction_1.receiver_account_id,
+                   "transaction_starter_account_id" =>
+                     account_transaction_1.transaction_starter_account_id,
+                   "transaction_type" => account_transaction_1.transaction_type
+                 }
+               ]
+             } == response
+    end
+
     test "successfully generates report with multiple transactions", %{conn: conn} do
       account_transaction_1 =
         insert(:account_transaction,
