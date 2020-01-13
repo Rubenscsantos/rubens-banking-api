@@ -13,6 +13,8 @@ defmodule RubensBankingApi do
   alias RubensBankingApi.AccountTransactions.AccountTransactionsRepository
   alias RubensBankingApi.Repo
 
+  alias RubensBankingApi.Helpers.MoneyHelper
+
   alias Ecto.Multi
 
   def create_new_account(
@@ -133,9 +135,9 @@ defmodule RubensBankingApi do
          get_receiver_account: %{owner_name: receiver_owner_name}
        }} ->
         Logger.info(
-          "Successfully transfered #{amount} from #{transaction_starter_owner_name}'s account to #{
-            receiver_owner_name
-          }'s account"
+          "Successfully transfered #{MoneyHelper.convert_amount(amount)} from #{
+            transaction_starter_owner_name
+          }'s account to #{receiver_owner_name}'s account"
         )
 
         {:ok, account_transaction}
@@ -199,7 +201,9 @@ defmodule RubensBankingApi do
        %{
          update_account: %{owner_name: account_owner_name} = account
        }} ->
-        Logger.info("Successfully withdrew #{amount} from #{account_owner_name}'s account")
+        Logger.info(
+          "Successfully withdrew #{MoneyHelper.convert_amount(amount)} from #{account_owner_name}'s account"
+        )
 
         {:ok, account}
 
