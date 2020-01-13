@@ -28,7 +28,7 @@ defmodule RubensBankingApi.AuthTest do
       assert user.email == "some email"
       assert user.is_active == true
       assert Auth.list_users() == [user]
-      assert Bcrypt.verify_pass("some password", user.password_hash)
+      assert Argon2.verify_pass("some password", user.password_hash)
     end
 
     test "get_user!/1 returns the user with given id" do
@@ -58,7 +58,7 @@ defmodule RubensBankingApi.AuthTest do
       user = user_fixture()
       assert {:error, %Ecto.Changeset{}} = Auth.update_user(user, @invalid_attrs)
       assert user == Auth.get_user!(user.id)
-      assert Bcrypt.verify_pass("some password", user.password_hash)
+      assert Argon2.verify_pass("some password", user.password_hash)
     end
 
     test "delete_user/1 deletes the user" do
