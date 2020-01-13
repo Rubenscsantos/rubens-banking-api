@@ -81,7 +81,7 @@ defmodule RubensBankingApiTest do
                          amount: 5000,
                          transaction_type: "transfer money"
                        }} = RubensBankingApi.transfer_money(params)
-             end) =~ "Successfully transfered 5000 from Grimes's account to Tyler's account"
+             end) =~ "Successfully transfered R$50,00 from Grimes's account to Tyler's account"
     end
 
     test "returns error in case the transaction starter does not have enought money to transfer" do
@@ -138,7 +138,7 @@ defmodule RubensBankingApiTest do
                          id: ^account_id,
                          balance: 75_000
                        }} = RubensBankingApi.withdraw(params)
-             end) =~ "Successfully withdrew 25000 from MFDOOM's account"
+             end) =~ "Successfully withdrew R$250,00 from MFDOOM's account"
     end
 
     test "returns error in case the account does not have enought money to withdraw" do
