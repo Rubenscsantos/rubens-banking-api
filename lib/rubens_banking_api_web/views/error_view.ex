@@ -22,6 +22,10 @@ defmodule RubensBankingApiWeb.ErrorView do
     %{errors: errors}
   end
 
+  def render("401.json", %{message: message}) do
+    %{errors: %{detail: message}}
+  end
+
   # By default, Phoenix returns the status message from
   # the template name. For example, "404.json" becomes
   # "Not Found".

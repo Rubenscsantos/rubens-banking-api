@@ -24,6 +24,7 @@ defmodule RubensBankingApiWeb.Router do
 
     scope "/users" do
       resources("/", UserController, except: [:new, :edit])
+      post("/sign_in", UserController, :sign_in)
     end
   end
 end
