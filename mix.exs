@@ -42,6 +42,7 @@ defmodule RubensBankingApi.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:ex_machina, "~> 2.3", only: :test},
+      {:bcrypt_elixir, "~> 2.0"},
       {:excoveralls, "~> 0.12", only: :test},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
