@@ -1,5 +1,8 @@
 defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
-  @moduledoc false
+  @moduledoc """
+    Table that contains all transactions made, used to generate reports
+    for account transactions.
+  """
 
   use Ecto.Schema
   import Ecto.Changeset

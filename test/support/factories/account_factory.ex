@@ -1,5 +1,7 @@
 defmodule RubensBankingApi.Factories.AccountFactory do
-  @moduledoc false
+  @moduledoc """
+    Factory for Account
+  """
   defmacro __using__(_opts) do
     quote do
       alias RubensBankingApi.Accounts.Account

@@ -1,5 +1,7 @@
 defmodule RubensBankingApi.Auth do
-  @moduledoc false
+  @moduledoc """
+    Abstraction for UsersRepository
+  """
   alias RubensBankingApi.Auth.UsersRepository
 
   alias RubensBankingApi.Auth.User

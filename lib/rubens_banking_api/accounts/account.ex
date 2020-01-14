@@ -1,5 +1,7 @@
 defmodule RubensBankingApi.Accounts.Account do
-  @moduledoc false
+  @moduledoc """
+    Table that contains all accounts.
+  """
 
   use Ecto.Schema
   import Ecto.Changeset
