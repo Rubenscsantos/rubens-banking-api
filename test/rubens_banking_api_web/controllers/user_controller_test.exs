@@ -107,13 +107,18 @@ defmodule RubensBankingApiWeb.UserControllerTest do
   describe "delete user" do
     setup [:create_user]
 
-    test "deletes chosen user", %{conn: conn, user: user} do
-      conn = delete(conn, user_path(conn, :delete, user))
+    test "deletes chosen user", %{conn: conn, user: %{id: user_id} = user} do
+      conn = delete(conn, user_path(conn, :delete, user_id))
       assert response(conn, 204)
 
-      assert_error_sent(404, fn ->
-        get(conn, user_path(conn, :show, user))
-      end)
+      conn = get(conn, user_path(conn, :show, user))
+
+      response =
+        conn
+        |> get(user_path(conn, :show, user))
+        |> json_response(400)
+
+      assert %{"errors" => "user_not_found"} == response
     end
   end
 
@@ -128,8 +133,8 @@ defmodule RubensBankingApiWeb.UserControllerTest do
           })
         )
 
+      response = json_response(conn, 200)
 
-        response = json_response(conn, 200)
       assert response["data"] == %{
                "user" => %{
                  "id" => current_user.id,
