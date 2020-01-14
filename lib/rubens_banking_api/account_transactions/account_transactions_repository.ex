@@ -7,7 +7,8 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
 
   import Ecto.Query
 
-  @spec create(params :: map()) :: {:ok, Account.t()} | {:error, reason :: %Ecto.Changeset{}}
+  @spec create(params :: map()) ::
+          {:ok, AccountTransaction.t()} | {:error, reason :: %Ecto.Changeset{}}
   def create(params) do
     %AccountTransaction{}
     |> AccountTransaction.changeset(params)

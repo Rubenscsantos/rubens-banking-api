@@ -1,8 +1,6 @@
 defmodule RubensBankingApiWeb.AccountController do
   use RubensBankingApiWeb, :controller
 
-  alias RubensBankingApi.Accounts.Accounts
-
   action_fallback(RubensBankingApiWeb.FallbackController)
 
   def create(conn, account_params) do
@@ -16,7 +14,7 @@ defmodule RubensBankingApiWeb.AccountController do
   def show(conn, account_params) do
     id = Map.get(account_params, "account_id")
 
-    with {:ok, account} <- Accounts.get_account(id) do
+    with {:ok, account} <- RubensBankingApi.get_account(id) do
       conn
       |> put_status(200)
       |> render("show.json", account: account)
