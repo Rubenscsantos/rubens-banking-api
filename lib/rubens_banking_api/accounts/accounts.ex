@@ -1,5 +1,7 @@
 defmodule RubensBankingApi.Accounts do
-  @moduledoc false
+  @moduledoc """
+    Abstraction for AccountsRepository
+  """
   alias RubensBankingApi.Accounts.{Account, AccountsRepository}
 
   @spec create_account(params :: map()) ::

@@ -3,8 +3,9 @@ defmodule RubensBankingApi do
   RubensBankingApi keeps the contexts that define your domain
   and business logic.
 
-  Contexts are also responsible for managing your data, regardless
-  if it comes from the database, an external API or others.
+  Responsible for all operations. Uses Multi so that operations only
+  happen in case all operations are successful, in order to avoid
+  tables being different.
   """
 
   require Logger
