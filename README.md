@@ -1,20 +1,45 @@
 # RubensBankingApi
 
-To start your Phoenix server:
+## Requirements
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.create && mix ecto.migrate`
-  * Install Node.js dependencies with `cd assets && npm install`
-  * Start Phoenix endpoint with `mix phx.server`
+Using your favorite package manager install
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+- [Docker](https://docs.docker.com/compose/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Postman](https://www.getpostman.com/)
 
-Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
+make sure you are in the Docker group by doing
 
-## Learn more
+```shell
+$ sudo gpasswd -a YOUR_USER docker
+```
 
-  * Official website: http://www.phoenixframework.org/
-  * Guides: http://phoenixframework.org/docs/overview
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+# Running the containers
+
+- `make down` - Stops the containers
+- `make test-shell` - Build containers test environment and connects to shell
+- `docker-compose up --build` - Build containers and run mix phx.server
+
+# Testing
+
+Inside the Docker image, the following commands are available (`make test-shell`)
+
+- `mix test` - Runs the tests
+- `iex -S mix` - Opens the elixir interactive shell
+- `mix credo --strict --verbose` - Runs Credo, a linter
+- `mix format` - Runs `mix format`
+
+Install NPM then run `npm install` to install the pre-commit package.
+
+# Documentation
+
+## API Docs
+
+- [Postman](./RubensBankingApi.postman_collection.json)
+
+# Running the application
+
+Run the `docker-compose up --build` command to start the application.
+When it's up you can use Postman to make requests to `http://localhost:4000`.
+
+The Postman collection is divided in folders, in order to be able to make the requests in the `Account` and `AccountTransaction` folders you need to be authenticated. You can do that by doing the POST request inside the `User` folder to create a new User, then doing the POST request inside the `Authentication` folder in order to Sign In.

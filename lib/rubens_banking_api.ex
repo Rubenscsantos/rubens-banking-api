@@ -9,9 +9,12 @@ defmodule RubensBankingApi do
 
   require Logger
 
-  alias RubensBankingApi.Accounts.AccountsRepository
-  alias RubensBankingApi.AccountTransactions.AccountTransactionsRepository
+  alias RubensBankingApi.Accounts
+  alias RubensBankingApi.AccountTransactions
   alias RubensBankingApi.Repo
+
+  defdelegate get_account(id), to: Accounts
+  defdelegate get_report(report_params), to: AccountTransactions
 
   alias RubensBankingApi.Helpers.MoneyHelper
 
@@ -27,7 +30,7 @@ defmodule RubensBankingApi do
       {:ok, new_account_params}
     end)
     |> Multi.run(:create_account, fn %{generate_new_account_params: new_account_params} ->
-      AccountsRepository.create(new_account_params)
+      Accounts.create_account(new_account_params)
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             create_account: %{
@@ -46,7 +49,7 @@ defmodule RubensBankingApi do
                                                    generate_account_transaction_params:
                                                      account_transaction_params
                                                  } ->
-      AccountTransactionsRepository.create(account_transaction_params)
+      AccountTransactions.create_account_transaction(account_transaction_params)
     end)
     |> Repo.transaction()
     |> case do
@@ -85,24 +88,24 @@ defmodule RubensBankingApi do
       end
     end)
     |> Multi.run(:get_transaction_starter_account, fn _changes ->
-      AccountsRepository.get(transaction_starter_account_id)
+      Accounts.get_account(transaction_starter_account_id)
     end)
     |> Multi.run(:get_receiver_account, fn _changes ->
-      AccountsRepository.get(receiver_account_id)
+      Accounts.get_account(receiver_account_id)
     end)
     |> Multi.run(:update_transaction_starter_balance, fn %{
                                                            get_transaction_starter_account:
                                                              %{balance: balance} = account,
                                                            check_amount: amount
                                                          } ->
-      AccountsRepository.update_account_balance(account, %{balance: balance - amount})
+      Accounts.update_account_balance(account, %{balance: balance - amount})
     end)
     |> Multi.run(:update_receiver_balance, fn %{
                                                 get_receiver_account:
                                                   %{balance: balance} = account,
                                                 check_amount: amount
                                               } ->
-      AccountsRepository.update_account_balance(account, %{balance: balance + amount})
+      Accounts.update_account_balance(account, %{balance: balance + amount})
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             get_transaction_starter_account: %{
@@ -124,7 +127,7 @@ defmodule RubensBankingApi do
                                                                   generate_account_transaction_params:
                                                                     account_transaction_params
                                                                 } ->
-      AccountTransactionsRepository.create(account_transaction_params)
+      AccountTransactions.create_account_transaction(account_transaction_params)
     end)
     |> Repo.transaction()
     |> case do
@@ -169,13 +172,22 @@ defmodule RubensBankingApi do
       end
     end)
     |> Multi.run(:get_account, fn _changes ->
-      AccountsRepository.get(account_id)
+      Accounts.get_account(account_id)
     end)
     |> Multi.run(:update_account, fn %{
                                        get_account: %{balance: balance} = account,
                                        check_amount: amount
                                      } ->
-      AccountsRepository.update_account_balance(account, %{balance: balance - amount})
+      Accounts.update_account_balance(account, %{balance: balance - amount})
+    end)
+    |> Multi.run(:notify_account_owner, fn %{check_amount: amount} ->
+      Logger.info(
+        "Successfully sent email to account owner notifying the withdraw of #{
+          MoneyHelper.convert_amount(amount)
+        }"
+      )
+
+      {:ok, :ok}
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             get_account: %{
@@ -193,7 +205,7 @@ defmodule RubensBankingApi do
                                                             generate_account_transaction_params:
                                                               account_transaction_params
                                                           } ->
-      AccountTransactionsRepository.create(account_transaction_params)
+      AccountTransactions.create_account_transaction(account_transaction_params)
     end)
     |> Repo.transaction()
     |> case do
@@ -224,10 +236,10 @@ defmodule RubensBankingApi do
   def close_account(%{"account_id" => account_id}) do
     Multi.new()
     |> Multi.run(:get_account, fn _changes ->
-      AccountsRepository.get(account_id)
+      Accounts.get_account(account_id)
     end)
     |> Multi.run(:close_account, fn %{get_account: account} ->
-      AccountsRepository.close_account(account)
+      Accounts.close_account(account)
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{get_account: %{id: account_id}} ->
       {:ok, %{transaction_starter_account_id: account_id, transaction_type: "close account"}}
@@ -236,7 +248,7 @@ defmodule RubensBankingApi do
                                                                  generate_account_transaction_params:
                                                                    account_transaction_params
                                                                } ->
-      AccountTransactionsRepository.create(account_transaction_params)
+      AccountTransactions.create_account_transaction(account_transaction_params)
     end)
     |> Repo.transaction()
     |> case do
