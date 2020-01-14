@@ -3,6 +3,8 @@ defmodule RubensBankingApiWeb.Router do
 
   alias RubensBankingApiWeb.{AccountController, AccountTransactionController, UserController}
 
+  alias RubensBankingApi.{Auth, Auth.User}
+
   pipeline :api do
     plug(:accepts, ["json"])
     plug(:fetch_session)
@@ -41,14 +43,16 @@ defmodule RubensBankingApiWeb.Router do
   defp ensure_authenticated(conn, _opts) do
     current_user_id = get_session(conn, :current_user_id)
 
-    if current_user_id do
-      conn
-    else
-      conn
-      |> put_status(:unauthorized)
-      |> put_view(RubensBankingApiWeb.ErrorView)
-      |> render("401.json", message: "Unauthenticated user")
-      |> halt()
+    case Auth.get_user(current_user_id) do
+      {:ok, %User{}} ->
+        conn
+
+      _error ->
+        conn
+        |> put_status(:unauthorized)
+        |> put_view(RubensBankingApiWeb.ErrorView)
+        |> render("401.json", message: "Unauthenticated user")
+        |> halt()
     end
   end
 end

@@ -49,7 +49,7 @@ defmodule RubensBankingApiWeb.UserControllerTest do
   end
 
   describe "create user" do
-    test "renders user when data is valid", %{conn: conn, current_user: current_user} do
+    test "renders user when data is valid", %{conn: conn} do
       conn = get(conn, user_path(conn, :index))
 
       json_response(conn, 200)["data"]
@@ -64,10 +64,6 @@ defmodule RubensBankingApiWeb.UserControllerTest do
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get(conn, user_path(conn, :show, id))
-
-      # conn = conn
-      # |> init_test_session(foo: "bar")
-      # |> delete(session_path(conn, :delete))
 
       assert json_response(conn, 200)["data"] == %{
                "id" => id,

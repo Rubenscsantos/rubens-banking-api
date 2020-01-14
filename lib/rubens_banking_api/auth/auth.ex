@@ -11,9 +11,11 @@ defmodule RubensBankingApi.Auth do
 
   @spec get_user(id :: String.t()) ::
           {:error, :user_not_found} | {:ok, User.t()}
-  def get_user(id) do
+  def get_user(id) when not is_nil(id) do
     UsersRepository.get(id)
   end
+
+  def get_user(_id), do: {:error, :user_not_found}
 
   @spec create_user(user_params :: User.t()) :: {:ok, User.t()} | {:error, reason :: any()}
   def create_user(user_params) do
