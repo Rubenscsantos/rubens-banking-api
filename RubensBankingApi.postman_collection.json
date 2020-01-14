@@ -18,11 +18,17 @@
 								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "current_user",
+								"value": "923745e5-229a-48ad-ae8d-6613f6c888a2",
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"document\": \"3984753985\", \n\t\"document_type\": \"RG\", \n\t\"owner_name\": \"Tupac\"\n}",
+							"raw": "{\n\t\"document\": \"3984753986\", \n\t\"document_type\": \"CPF\", \n\t\"owner_name\": \"Biggie\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -182,7 +188,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"account_id\": \"1\",\n\t\"report_period\": \"day\"\n}",
+							"raw": "{\n\t\"account_id\": \"1\",\n\t\"report_period\": \"total\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
