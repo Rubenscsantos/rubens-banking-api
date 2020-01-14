@@ -17,3 +17,5 @@ config :rubens_banking_api, RubensBankingApi.Repo,
   database: "rubens_banking_api_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :argon2_elixir, t_cost: 1, m_cost: 8
