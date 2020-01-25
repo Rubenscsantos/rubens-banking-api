@@ -6,12 +6,17 @@ defmodule RubensBankingApi.Accounts.Account do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:id, :binary_id, autogenerate: true}
+
   schema "accounts" do
     field(:balance, :integer)
     field(:owner_name, :string)
     field(:document_type, :string)
     field(:document, :string)
     field(:status, :string)
+    field(:account_code, :string)
+
+    # belongs_to(:users, RubensBankingApi.Users.User)
 
     timestamps()
   end
@@ -23,9 +28,19 @@ defmodule RubensBankingApi.Accounts.Account do
       :document_type,
       :document,
       :status,
-      :owner_name
+      :owner_name,
+      :account_code
     ])
-    |> validate_required([:document, :document_type, :owner_name, :balance, :status])
+    |> validate_required([
+      :document,
+      :document_type,
+      :owner_name,
+      :balance,
+      :status,
+      :account_code
+    ])
+    |> update_change(:account_code, &String.trim_leading(&1, "0"))
+    |> unique_constraint(:account_code)
     |> validate_number(:balance, equal_to: 100_000)
     |> validate_inclusion(:status, ["open"])
   end

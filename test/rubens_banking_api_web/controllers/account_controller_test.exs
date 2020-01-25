@@ -36,19 +36,19 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
                "data" => %{
                  "document" => document,
                  "document_type" => document_type,
-                 "id" => account_id,
+                 "account_code" => account_code,
                  "owner_name" => owner_name,
                  "status" => status
                }
              } = response
 
-      response = conn |> get(account_path(conn, :show, account_id)) |> json_response(200)
+      response = conn |> get(account_path(conn, :show, account_code)) |> json_response(200)
 
       assert %{
                "data" => %{
                  "document" => ^document,
                  "document_type" => ^document_type,
-                 "id" => ^account_id,
+                 "account_code" => ^account_code,
                  "owner_name" => ^owner_name,
                  "status" => ^status
                }
@@ -58,20 +58,20 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
 
   describe "show/2" do
     test "given an existing id, return the correct account", %{conn: conn} do
-      %{id: account_id, balance: balance} = account = insert(:account)
+      %{account_code: account_code, balance: balance} = account = insert(:account)
 
       converted_balance = MoneyHelper.convert_amount(balance)
 
       response =
         conn
-        |> get(account_path(conn, :show, account_id))
+        |> get(account_path(conn, :show, account_code))
         |> json_response(200)
 
       assert %{
                "data" => %{
                  "document" => account.document,
                  "document_type" => account.document_type,
-                 "id" => account.id,
+                 "account_code" => account.account_code,
                  "owner_name" => account.owner_name,
                  "balance" => converted_balance,
                  "status" => account.status
@@ -82,31 +82,31 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
 
   @moduletag :capture_log
   describe "close_account/2" do
-    test "given an existing id, closes an open account", %{conn: conn} do
-      %{id: account_id} = insert(:account, status: "open")
+    test "given an existing account code, closes an open account", %{conn: conn} do
+      %{account_code: account_code} = insert(:account, status: "open")
 
       response =
         conn
-        |> post(account_path(conn, :close, account_id))
+        |> post(account_path(conn, :close, account_code))
         |> json_response(201)
 
       assert %{
                "data" => %{
                  "document" => document,
                  "document_type" => document_type,
-                 "id" => account_id,
+                 "account_code" => account_code,
                  "owner_name" => owner_name,
                  "status" => "closed"
                }
              } = response
 
-      response = conn |> get(account_path(conn, :show, account_id)) |> json_response(200)
+      response = conn |> get(account_path(conn, :show, account_code)) |> json_response(200)
 
       assert %{
                "data" => %{
                  "document" => ^document,
                  "document_type" => ^document_type,
-                 "id" => ^account_id,
+                 "account_code" => ^account_code,
                  "owner_name" => ^owner_name,
                  "status" => "closed"
                }
@@ -114,11 +114,11 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
     end
 
     test "returns error when account was already closed", %{conn: conn} do
-      %{id: account_id} = insert(:account, status: "closed")
+      %{account_code: account_code} = insert(:account, status: "closed")
 
       response =
         conn
-        |> post(account_path(conn, :close, account_id))
+        |> post(account_path(conn, :close, account_code))
         |> json_response(400)
 
       assert %{"errors" => "account_is_already_closed"} == response
@@ -127,9 +127,9 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
 
   describe "withdraw/2" do
     test "successfully withdraws money from account", %{conn: conn} do
-      %{id: account_id, balance: balance} = insert(:account)
+      %{account_code: account_code, balance: balance} = insert(:account)
 
-      params = %{account_id: account_id, amount: 25_000}
+      params = %{account_code: account_code, amount: 25_000}
 
       response =
         conn
@@ -140,20 +140,20 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
                "data" => %{
                  "document" => document,
                  "document_type" => document_type,
-                 "id" => ^account_id,
+                 "account_code" => ^account_code,
                  "owner_name" => owner_name,
                  "balance" => amount,
                  "status" => status
                }
              } = response
 
-      response = conn |> get(account_path(conn, :show, account_id)) |> json_response(200)
+      response = conn |> get(account_path(conn, :show, account_code)) |> json_response(200)
 
       assert %{
                "data" => %{
                  "document" => ^document,
                  "document_type" => ^document_type,
-                 "id" => ^account_id,
+                 "account_code" => ^account_code,
                  "owner_name" => ^owner_name,
                  "balance" => ^amount,
                  "status" => ^status
@@ -164,9 +164,9 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
     end
 
     test "returns error when account was already closed", %{conn: conn} do
-      %{id: account_id} = insert(:account, status: "closed")
+      %{account_code: account_code} = insert(:account, status: "closed")
 
-      params = %{account_id: account_id, amount: 25_000}
+      params = %{account_code: account_code, amount: 25_000}
 
       response =
         conn
@@ -180,12 +180,12 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
   describe "transfer_money/2" do
     test "successfully transfer money from the transaction starter account to the receiver account",
          %{conn: conn} do
-      %{id: transaction_starter_id} = insert(:account)
-      %{id: receiver_account_id} = insert(:account)
+      %{account_code: transaction_starter_account_code} = insert(:account)
+      %{account_code: receiver_account_code} = insert(:account)
 
       params = %{
-        transaction_starter_account_id: transaction_starter_id,
-        receiver_account_id: receiver_account_id,
+        transaction_starter_account_code: transaction_starter_account_code,
+        receiver_account_code: receiver_account_code,
         amount: 25_000
       }
 
@@ -199,8 +199,8 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
       assert %{
                "data" => %{
                  "amount" => ^converted_amount,
-                 "receiver_account_id" => ^receiver_account_id,
-                 "transaction_starter_account_id" => ^transaction_starter_id,
+                 "receiver_account_code" => ^receiver_account_code,
+                 "transaction_starter_account_code" => ^transaction_starter_account_code,
                  "transaction_type" => "transfer money"
                }
              } = response
@@ -210,12 +210,12 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
     test "returns error when transaction starter account does not have enough money", %{
       conn: conn
     } do
-      %{id: transaction_starter_id} = insert(:account, balance: 24_999)
-      %{id: receiver_account_id} = insert(:account)
+      %{account_code: transaction_starter_account_code} = insert(:account, balance: 24_999)
+      %{account_code: receiver_account_code} = insert(:account)
 
       params = %{
-        transaction_starter_account_id: transaction_starter_id,
-        receiver_account_id: receiver_account_id,
+        transaction_starter_account_code: transaction_starter_account_code,
+        receiver_account_code: receiver_account_code,
         amount: 25_000
       }
 
@@ -228,12 +228,12 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
     end
 
     test "returns error when account was already closed", %{conn: conn} do
-      %{id: transaction_starter_account_id} = insert(:account, status: "closed")
-      %{id: receiver_account_id} = insert(:account)
+      %{account_code: transaction_starter_account_code} = insert(:account, status: "closed")
+      %{account_code: receiver_account_code} = insert(:account)
 
       params = %{
-        transaction_starter_account_id: transaction_starter_account_id,
-        receiver_account_id: receiver_account_id,
+        transaction_starter_account_code: transaction_starter_account_code,
+        receiver_account_code: receiver_account_code,
         amount: 25_000
       }
 

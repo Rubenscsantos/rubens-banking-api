@@ -5,19 +5,30 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
 
   describe "create/1" do
     test "successfully creates an account" do
-      new_account = %{
-        balance: 100_000,
-        document: "1234554321",
-        document_type: "RG",
-        owner_name: "Bjork",
-        status: "open"
-      }
+      new_account = build(:account) |> Map.from_struct()
+      new_account = for {key, val} <- new_account, into: %{}, do: {Atom.to_string(key), val}
 
       assert [] == Repo.all(Account)
 
       assert {:ok, %Account{}} = AccountsRepository.create(new_account)
 
       refute Enum.empty?(Repo.all(Account))
+    end
+
+    test "returns error when trying to create account with already existing account_code" do
+      new_account = build(:account) |> Map.from_struct()
+      new_account = for {key, val} <- new_account, into: %{}, do: {Atom.to_string(key), val}
+
+      assert [] == Repo.all(Account)
+
+      assert {:ok, %Account{}} = AccountsRepository.create(new_account)
+
+      assert {:error,
+              %Ecto.Changeset{
+                action: :insert,
+                errors: [account_code: {"has already been taken", []}],
+                valid?: false
+              }} = AccountsRepository.create(new_account)
     end
 
     test "returns error when required fields are missing" do
@@ -39,13 +50,8 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
     end
 
     test "returns error when balance is not R$1000,00 on creation" do
-      new_account = %{
-        balance: 10,
-        document: "1234554321",
-        document_type: "RG",
-        owner_name: "Tom",
-        status: "open"
-      }
+      new_account = build(:account, balance: 10) |> Map.from_struct()
+      new_account = for {key, val} <- new_account, into: %{}, do: {Atom.to_string(key), val}
 
       assert {:error,
               %Ecto.Changeset{
@@ -57,13 +63,8 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
     end
 
     test "returns error when status is not open on creation" do
-      new_account = %{
-        balance: 100_000,
-        document: "1234554321",
-        document_type: "RG",
-        owner_name: "Tom",
-        status: "closed"
-      }
+      new_account = build(:account, status: "closed") |> Map.from_struct()
+      new_account = for {key, val} <- new_account, into: %{}, do: {Atom.to_string(key), val}
 
       assert {:error,
               %Ecto.Changeset{
@@ -75,13 +76,14 @@ defmodule RubensBankingApi.Accounts.AccountsRepositoryTest do
 
   describe "get/1" do
     test "successfully returns an account" do
-      %{id: account_id} = account = insert(:account)
+      %{account_code: account_code} = account = insert(:account)
 
-      assert {:ok, account} == AccountsRepository.get(account_id)
+      assert {:ok, account} == AccountsRepository.get(account_code)
     end
 
     test "returns `{:error, :account_not_found}` if there is no account with given id" do
-      assert {:error, :account_not_found} == AccountsRepository.get(1)
+      assert {:error, :account_not_found} ==
+               AccountsRepository.get("15325")
     end
   end
 

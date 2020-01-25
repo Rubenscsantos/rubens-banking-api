@@ -5,4 +5,10 @@ defmodule RubensBankingApi.Factories.Factory do
   use ExMachina.Ecto, repo: RubensBankingApi.Repo
   use RubensBankingApi.Factories.AccountFactory
   use RubensBankingApi.Factories.AccountTransactionFactory
+
+  def generate_account_code do
+    10_000..99_999
+    |> Enum.random()
+    |> to_string()
+  end
 end

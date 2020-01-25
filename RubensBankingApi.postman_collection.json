@@ -52,7 +52,7 @@
 					"response": []
 				},
 				{
-					"name": "localhost:4000/api/v1/accounts/:account_id",
+					"name": "localhost:4000/api/v1/accounts/:account_code",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -86,7 +86,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"account_id\": \"1\", \n\t\"amount\": \"2500\"\n}",
+							"raw": "{\n\t\"account_code\": \"1\", \n\t\"amount\": \"2500\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -123,7 +123,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"transaction_starter_account_id\": \"2\", \n\t\"receiver_account_id\": \"1\", \n\t\"amount\": \"25000\"\n}",
+							"raw": "{\n\t\"transaction_starter_account_code\": \"2\", \n\t\"receiver_account_code\": \"1\", \n\t\"amount\": \"25000\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -147,7 +147,7 @@
 					"response": []
 				},
 				{
-					"name": "localhost:4000/api/v1/accounts/:account_id/close",
+					"name": "localhost:4000/api/v1/accounts/:account_code/close",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -188,7 +188,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"account_id\": \"1\",\n\t\"report_period\": \"total\"\n}",
+							"raw": "{\n\t\"account_code\": \"1\",\n\t\"report_period\": \"total\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

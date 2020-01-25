@@ -28,6 +28,7 @@ defmodule RubensBankingApi do
     Multi.new()
     |> Multi.run(:generate_new_account_params, fn _changes ->
       new_account_params = params |> Map.put("status", "open") |> Map.put("balance", 100_000)
+
       {:ok, new_account_params}
     end)
     |> Multi.run(:create_account, fn %{generate_new_account_params: new_account_params} ->
@@ -35,13 +36,13 @@ defmodule RubensBankingApi do
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             create_account: %{
-                                                              id: account_id,
+                                                              account_code: account_code,
                                                               balance: amount
                                                             }
                                                           } ->
       {:ok,
        %{
-         transaction_starter_account_id: account_id,
+         transaction_starter_account_code: account_code,
          amount: amount,
          transaction_type: "open account"
        }}
@@ -73,8 +74,8 @@ defmodule RubensBankingApi do
   end
 
   def transfer_money(%{
-        "transaction_starter_account_id" => transaction_starter_account_id,
-        "receiver_account_id" => receiver_account_id,
+        "transaction_starter_account_code" => transaction_starter_account_code,
+        "receiver_account_code" => receiver_account_code,
         "amount" => amount
       }) do
     Multi.new()
@@ -89,10 +90,10 @@ defmodule RubensBankingApi do
       end
     end)
     |> Multi.run(:get_transaction_starter_account, fn _changes ->
-      Accounts.get_account(transaction_starter_account_id)
+      Accounts.get_account(transaction_starter_account_code)
     end)
     |> Multi.run(:get_receiver_account, fn _changes ->
-      Accounts.get_account(receiver_account_id)
+      Accounts.get_account(receiver_account_code)
     end)
     |> Multi.run(:update_transaction_starter_balance, fn %{
                                                            get_transaction_starter_account:
@@ -110,16 +111,17 @@ defmodule RubensBankingApi do
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             get_transaction_starter_account: %{
-                                                              id: transaction_starter_account_id
+                                                              account_code:
+                                                                transaction_starter_account_code
                                                             },
                                                             get_receiver_account: %{
-                                                              id: receiver_account_id
+                                                              account_code: receiver_account_code
                                                             }
                                                           } ->
       {:ok,
        %{
-         transaction_starter_account_id: transaction_starter_account_id,
-         receiver_account_id: receiver_account_id,
+         transaction_starter_account_code: transaction_starter_account_code,
+         receiver_account_code: receiver_account_code,
          amount: amount,
          transaction_type: "transfer money"
        }}
@@ -160,7 +162,7 @@ defmodule RubensBankingApi do
     {:error, :missing_parameters}
   end
 
-  def withdraw(%{"account_id" => account_id, "amount" => amount}) do
+  def withdraw(%{"account_code" => account_code, "amount" => amount}) do
     Multi.new()
     |> Multi.run(:check_amount, fn _changes ->
       case Integer.parse(amount) do
@@ -173,7 +175,7 @@ defmodule RubensBankingApi do
       end
     end)
     |> Multi.run(:get_account, fn _changes ->
-      Accounts.get_account(account_id)
+      Accounts.get_account(account_code)
     end)
     |> Multi.run(:update_account, fn %{
                                        get_account: %{balance: balance} = account,
@@ -192,12 +194,13 @@ defmodule RubensBankingApi do
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             get_account: %{
-                                                              id: transaction_starter_account_id
+                                                              account_code:
+                                                                transaction_starter_account_code
                                                             }
                                                           } ->
       {:ok,
        %{
-         transaction_starter_account_id: transaction_starter_account_id,
+         transaction_starter_account_code: transaction_starter_account_code,
          amount: amount,
          transaction_type: "withdraw"
        }}
@@ -234,16 +237,20 @@ defmodule RubensBankingApi do
     {:error, :missing_parameters}
   end
 
-  def close_account(%{"account_id" => account_id}) do
+  def close_account(%{"account_code" => account_code}) do
     Multi.new()
     |> Multi.run(:get_account, fn _changes ->
-      Accounts.get_account(account_id)
+      Accounts.get_account(account_code)
     end)
     |> Multi.run(:close_account, fn %{get_account: account} ->
       Accounts.close_account(account)
     end)
-    |> Multi.run(:generate_account_transaction_params, fn %{get_account: %{id: account_id}} ->
-      {:ok, %{transaction_starter_account_id: account_id, transaction_type: "close account"}}
+    |> Multi.run(:generate_account_transaction_params, fn %{
+                                                            get_account: %{
+                                                              account_code: account_code
+                                                            }
+                                                          } ->
+      {:ok, %{transaction_starter_account_code: account_code, transaction_type: "close account"}}
     end)
     |> Multi.run(:create_close_account_account_transaction, fn %{
                                                                  generate_account_transaction_params:

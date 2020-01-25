@@ -21,8 +21,8 @@ defmodule RubensBankingApiWeb.Router do
       pipe_through([:api_auth])
 
       post("/", AccountController, :create)
-      get("/:account_id", AccountController, :show)
-      post("/:account_id/close", AccountController, :close)
+      get("/:account_code", AccountController, :show)
+      post("/:account_code/close", AccountController, :close)
       post("/withdraw", AccountController, :withdraw)
       post("/transfer_money", AccountController, :transfer_money)
     end

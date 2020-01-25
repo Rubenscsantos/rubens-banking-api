@@ -12,7 +12,7 @@ defmodule RubensBankingApiWeb.AccountController do
   end
 
   def show(conn, account_params) do
-    id = Map.get(account_params, "account_id")
+    id = Map.get(account_params, "account_code")
 
     with {:ok, account} <- RubensBankingApi.get_account(id) do
       conn

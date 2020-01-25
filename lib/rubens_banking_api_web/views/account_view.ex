@@ -15,7 +15,7 @@ defmodule RubensBankingApiWeb.AccountView do
 
   def render("account.json", %{account: account}) do
     %{
-      id: account.id,
+      account_code: account.account_code,
       owner_name: account.owner_name,
       balance: convert_amount(account.balance),
       document: account.document,
@@ -27,8 +27,8 @@ defmodule RubensBankingApiWeb.AccountView do
   def render("account_transaction.json", %{account_transaction: account_transaction}) do
     %{
       id: account_transaction.id,
-      transaction_starter_account_id: account_transaction.transaction_starter_account_id,
-      receiver_account_id: account_transaction.receiver_account_id,
+      transaction_starter_account_code: account_transaction.transaction_starter_account_code,
+      receiver_account_code: account_transaction.receiver_account_code,
       transaction_type: account_transaction.transaction_type,
       amount: convert_amount(account_transaction.amount)
     }

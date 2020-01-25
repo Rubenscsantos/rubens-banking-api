@@ -5,11 +5,12 @@ defmodule RubensBankingApi.Factories.AccountTransactionFactory do
   defmacro __using__(_opts) do
     quote do
       alias RubensBankingApi.AccountTransactions.AccountTransaction
+      alias RubensBankingApi.Factories.Factory
 
       def account_transaction_factory do
         %AccountTransaction{
-          transaction_starter_account_id: Enum.random(1..100_000),
-          receiver_account_id: Enum.random(1..100_000),
+          transaction_starter_account_code: Factory.generate_account_code(),
+          receiver_account_code: Factory.generate_account_code(),
           transaction_type: "transfer money",
           amount: Enum.random(1..500_000)
         }

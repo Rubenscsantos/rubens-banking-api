@@ -10,10 +10,10 @@ defmodule RubensBankingApi.Accounts do
     AccountsRepository.create(account_params)
   end
 
-  @spec get_account(id :: String.t()) ::
+  @spec get_account(account_code :: String.t()) ::
           {:error, :account_not_found} | {:ok, RubensBankingApi.Accounts.Account.t()}
-  def get_account(id) do
-    AccountsRepository.get(id)
+  def get_account(account_code) do
+    AccountsRepository.get(account_code)
   end
 
   @spec update_account_balance(account :: Account.t(), params :: map()) ::

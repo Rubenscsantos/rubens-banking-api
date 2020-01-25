@@ -12,8 +12,8 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
   @primary_key {:id, :binary_id, autogenerate: true}
 
   schema "account_transactions" do
-    field(:transaction_starter_account_id, :integer)
-    field(:receiver_account_id, :integer)
+    field(:transaction_starter_account_code, :string)
+    field(:receiver_account_code, :string)
     field(:transaction_type, :string)
     field(:amount, :integer)
 
@@ -23,8 +23,8 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
   def changeset(account_transaction, attrs) do
     account_transaction
     |> cast(attrs, [
-      :transaction_starter_account_id,
-      :receiver_account_id,
+      :transaction_starter_account_code,
+      :receiver_account_code,
       :transaction_type,
       :amount
     ])
@@ -34,26 +34,26 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
 
   defp validate_requirements(changeset, "open account") do
     changeset
-    |> validate_required([:transaction_starter_account_id, :amount])
+    |> validate_required([:transaction_starter_account_code, :amount])
   end
 
   defp validate_requirements(changeset, "close account") do
     changeset
-    |> validate_required([:transaction_starter_account_id])
+    |> validate_required([:transaction_starter_account_code])
   end
 
   defp validate_requirements(changeset, "transfer money") do
     changeset
     |> validate_required([
-      :transaction_starter_account_id,
-      :receiver_account_id,
+      :transaction_starter_account_code,
+      :receiver_account_code,
       :amount
     ])
   end
 
   defp validate_requirements(changeset, "withdraw") do
     changeset
-    |> validate_required([:transaction_starter_account_id, :amount])
+    |> validate_required([:transaction_starter_account_code, :amount])
   end
 
   defp validate_requirements(changeset, _invalid_type),
