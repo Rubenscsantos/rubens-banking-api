@@ -57,8 +57,12 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
   end
 
   describe "show/2" do
-    test "given an existing id, return the correct account", %{conn: conn} do
-      %{account_code: account_code, balance: balance} = account = insert(:account)
+    test "given an existing id, return the correct account if current_user is authorized", %{
+      conn: conn,
+      current_user: %{id: current_user_id}
+    } do
+      %{account_code: account_code, balance: balance} =
+        account = insert(:account, user_id: current_user_id)
 
       converted_balance = MoneyHelper.convert_amount(balance)
 
@@ -78,12 +82,25 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
                }
              } == response
     end
+
+    test "does not return an account if current_user is not authorized", %{
+      conn: conn
+    } do
+      %{account_code: account_code} = insert(:account)
+
+      response = conn |> get(account_path(conn, :show, account_code)) |> json_response(400)
+
+      assert %{"errors" => "unauthorized_operation"} == response
+    end
   end
 
   @moduletag :capture_log
   describe "close_account/2" do
-    test "given an existing account code, closes an open account", %{conn: conn} do
-      %{account_code: account_code} = insert(:account, status: "open")
+    test "given an existing account code, closes an open account", %{
+      conn: conn,
+      current_user: %{id: current_user_id}
+    } do
+      %{account_code: account_code} = insert(:account, status: "open", user_id: current_user_id)
 
       response =
         conn
@@ -113,8 +130,11 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
              } = response
     end
 
-    test "returns error when account was already closed", %{conn: conn} do
-      %{account_code: account_code} = insert(:account, status: "closed")
+    test "returns error when account was already closed", %{
+      conn: conn,
+      current_user: %{id: current_user_id}
+    } do
+      %{account_code: account_code} = insert(:account, status: "closed", user_id: current_user_id)
 
       response =
         conn
@@ -126,8 +146,11 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
   end
 
   describe "withdraw/2" do
-    test "successfully withdraws money from account", %{conn: conn} do
-      %{account_code: account_code, balance: balance} = insert(:account)
+    test "successfully withdraws money from account", %{
+      conn: conn,
+      current_user: %{id: current_user_id}
+    } do
+      %{account_code: account_code, balance: balance} = insert(:account, user_id: current_user_id)
 
       params = %{account_code: account_code, amount: 25_000}
 
@@ -163,8 +186,11 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
       refute balance == amount
     end
 
-    test "returns error when account was already closed", %{conn: conn} do
-      %{account_code: account_code} = insert(:account, status: "closed")
+    test "returns error when account was already closed", %{
+      conn: conn,
+      current_user: %{id: current_user_id}
+    } do
+      %{account_code: account_code} = insert(:account, status: "closed", user_id: current_user_id)
 
       params = %{account_code: account_code, amount: 25_000}
 
@@ -179,8 +205,10 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
 
   describe "transfer_money/2" do
     test "successfully transfer money from the transaction starter account to the receiver account",
-         %{conn: conn} do
-      %{account_code: transaction_starter_account_code} = insert(:account)
+         %{conn: conn, current_user: %{id: current_user_id}} do
+      %{account_code: transaction_starter_account_code} =
+        insert(:account, user_id: current_user_id)
+
       %{account_code: receiver_account_code} = insert(:account)
 
       params = %{
@@ -208,9 +236,12 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
 
     @moduletag :capture_log
     test "returns error when transaction starter account does not have enough money", %{
-      conn: conn
+      conn: conn,
+      current_user: %{id: current_user_id}
     } do
-      %{account_code: transaction_starter_account_code} = insert(:account, balance: 24_999)
+      %{account_code: transaction_starter_account_code} =
+        insert(:account, balance: 24_999, user_id: current_user_id)
+
       %{account_code: receiver_account_code} = insert(:account)
 
       params = %{
@@ -227,8 +258,13 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
       assert %{"errors" => %{"balance" => ["must be greater than or equal to 0"]}} == response
     end
 
-    test "returns error when account was already closed", %{conn: conn} do
-      %{account_code: transaction_starter_account_code} = insert(:account, status: "closed")
+    test "returns error when account was already closed", %{
+      conn: conn,
+      current_user: %{id: current_user_id}
+    } do
+      %{account_code: transaction_starter_account_code} =
+        insert(:account, status: "closed", user_id: current_user_id)
+
       %{account_code: receiver_account_code} = insert(:account)
 
       params = %{

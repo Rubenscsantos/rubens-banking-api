@@ -13,6 +13,8 @@ defmodule RubensBankingApi.Auth.User do
     field :password, :string, virtual: true
     field :password_hash, :string
 
+    has_many :accounts, RubensBankingApi.Accounts.Account
+
     timestamps()
   end
 

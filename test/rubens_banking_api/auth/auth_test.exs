@@ -1,7 +1,7 @@
 defmodule RubensBankingApi.AuthTest do
   use RubensBankingApi.DataCase
 
-  alias RubensBankingApi.Auth
+  alias RubensBankingApi.{Auth, Repo}
 
   describe "users" do
     alias RubensBankingApi.Auth.User
@@ -33,7 +33,7 @@ defmodule RubensBankingApi.AuthTest do
 
     test "get_user/1 returns the user with given id" do
       user = user_fixture()
-      assert Auth.get_user(user.id) == {:ok, user}
+      assert Auth.get_user(user.id) == {:ok, user |> Repo.preload([:accounts])}
     end
 
     test "create_user/1 with valid data creates a user" do
@@ -57,7 +57,7 @@ defmodule RubensBankingApi.AuthTest do
     test "update_user/2 with invalid data returns error changeset" do
       user = user_fixture()
       assert {:error, %Ecto.Changeset{}} = Auth.update_user(user.id, @invalid_attrs)
-      assert {:ok, user} == Auth.get_user(user.id)
+      assert {:ok, user |> Repo.preload([:accounts])} == Auth.get_user(user.id)
       assert Argon2.verify_pass("some password", user.password_hash)
     end
 

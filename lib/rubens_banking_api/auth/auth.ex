@@ -47,7 +47,21 @@ defmodule RubensBankingApi.Auth do
     end
   end
 
+  @spec authenticate_user(email :: String.t(), password :: String.t()) ::
+          {:ok, User.t()} | {:error, reason :: any()}
   def authenticate_user(email, password) do
     UsersRepository.authenticate(email, password)
+  end
+
+  @spec authorize_operation(id :: String.t(), account_code :: String.t()) ::
+          {:ok, :authorized_operation} | {:error, :unauthorized_operation}
+  def authorize_operation(id, account_code) do
+    with {:ok, user} <- get_user(id),
+         accounts <- Map.get(user, :accounts) do
+      case Enum.find(accounts, fn account -> account.account_code == account_code end) do
+        nil -> {:error, :unauthorized_operation}
+        _account -> {:ok, :authorized_operation}
+      end
+    end
   end
 end

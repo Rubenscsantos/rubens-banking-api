@@ -16,7 +16,7 @@ defmodule RubensBankingApi.Accounts.Account do
     field(:status, :string)
     field(:account_code, :string)
 
-    # belongs_to(:users, RubensBankingApi.Users.User)
+    belongs_to(:user, RubensBankingApi.Users.User, type: :binary_id)
 
     timestamps()
   end
@@ -29,7 +29,8 @@ defmodule RubensBankingApi.Accounts.Account do
       :document,
       :status,
       :owner_name,
-      :account_code
+      :account_code,
+      :user_id
     ])
     |> validate_required([
       :document,
@@ -48,7 +49,8 @@ defmodule RubensBankingApi.Accounts.Account do
   def update_account_balance(account, attrs) do
     account
     |> cast(attrs, [
-      :balance
+      :balance,
+      :user_id
     ])
     |> validate_required([:balance])
     |> validate_number(:balance, greater_than_or_equal_to: 0)
