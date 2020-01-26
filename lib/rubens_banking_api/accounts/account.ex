@@ -6,7 +6,7 @@ defmodule RubensBankingApi.Accounts.Account do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary_id, autogenerate: true}
+  @primary_key {:account_code, :string, autogenerate: false}
 
   schema "accounts" do
     field(:balance, :integer)
@@ -14,7 +14,6 @@ defmodule RubensBankingApi.Accounts.Account do
     field(:document_type, :string)
     field(:document, :string)
     field(:status, :string)
-    field(:account_code, :string)
 
     belongs_to(:user, RubensBankingApi.Users.User, type: :binary_id)
 
