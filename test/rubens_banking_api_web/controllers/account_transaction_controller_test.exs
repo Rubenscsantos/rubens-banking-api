@@ -24,15 +24,20 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
   end
 
   describe "get_report/1" do
-    test "successfully generates report with one transaction", %{conn: conn} do
+    test "successfully generates report with one transaction", %{
+      conn: conn,
+      current_user: %{id: user_id}
+    } do
+      %{account_code: transaction_starter_account_code} = insert(:account, user_id: user_id)
+
       account_transaction_1 =
         insert(:account_transaction,
-          transaction_starter_account_code: "123123",
+          transaction_starter_account_code: transaction_starter_account_code,
           transaction_type: "open account",
           amount: "100000"
         )
 
-      params = %{account_code: "123123", report_period: "day"}
+      params = %{account_code: transaction_starter_account_code, report_period: "day"}
 
       response =
         conn
@@ -53,15 +58,20 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
              } == response
     end
 
-    test "successfully generates report when transaction does not have amount", %{conn: conn} do
+    test "successfully generates report when transaction does not have amount", %{
+      conn: conn,
+      current_user: %{id: user_id}
+    } do
+      %{account_code: transaction_starter_account_code} = insert(:account, user_id: user_id)
+
       account_transaction_1 =
         insert(:account_transaction,
-          transaction_starter_account_code: "123123",
+          transaction_starter_account_code: transaction_starter_account_code,
           transaction_type: "close account",
           amount: nil
         )
 
-      params = %{account_code: "123123", report_period: "day"}
+      params = %{account_code: transaction_starter_account_code, report_period: "day"}
 
       response =
         conn
@@ -81,29 +91,34 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
              } == response
     end
 
-    test "successfully generates report with multiple transactions", %{conn: conn} do
+    test "successfully generates report with multiple transactions", %{
+      conn: conn,
+      current_user: %{id: user_id}
+    } do
+      %{account_code: transaction_starter_account_code} = insert(:account, user_id: user_id)
+
       account_transaction_1 =
         insert(:account_transaction,
-          transaction_starter_account_code: "123123",
+          transaction_starter_account_code: transaction_starter_account_code,
           transaction_type: "open account",
           amount: "100000"
         )
 
       account_transaction_2 =
         insert(:account_transaction,
-          transaction_starter_account_code: "123123",
+          transaction_starter_account_code: transaction_starter_account_code,
           transaction_type: "withdraw",
           amount: "25000"
         )
 
       account_transaction_3 =
         insert(:account_transaction,
-          receiver_account_code: "123123",
+          receiver_account_code: transaction_starter_account_code,
           transaction_type: "transfer_money",
           amount: "10000"
         )
 
-      params = %{account_code: "123123", report_period: "day"}
+      params = %{account_code: transaction_starter_account_code, report_period: "day"}
 
       response =
         conn

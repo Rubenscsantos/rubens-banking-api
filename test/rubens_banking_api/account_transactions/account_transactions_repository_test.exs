@@ -173,7 +173,10 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
       %{account_code: account_code} = build(:account)
       now = NaiveDateTime.utc_now()
 
-      insert_pair(:account_transaction, transaction_starter_account_code: account_code)
+      insert_pair(:account_transaction,
+        transaction_starter_account_code: account_code,
+        inserted_at: now
+      )
 
       insert(:account_transaction,
         transaction_starter_account_code: account_code,
@@ -325,7 +328,10 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   defp next_day(now), do: now |> NaiveDateTime.add(@seconds_in_day, :second)
   defp next_week(now), do: now |> NaiveDateTime.add(@seconds_in_week, :second)
-  defp next_month(now), do: now |> Map.put(:month, now.month + 1)
+
+  defp next_month(now),
+    do: now |> Map.put(:month, now.month + 1) |> NaiveDateTime.add(@seconds_in_week, :second)
+
   defp next_year(now), do: now |> Map.put(:year, now.year + 1)
   defp two_years_from_now(now), do: now |> Map.put(:year, now.year + 2)
 end
