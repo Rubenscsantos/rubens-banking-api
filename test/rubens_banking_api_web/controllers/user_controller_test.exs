@@ -159,11 +159,26 @@ defmodule RubensBankingApiWeb.UserControllerTest do
   describe "delete user" do
     setup [:create_user]
 
-    test "deletes chosen user", %{conn: conn, current_user: %{id: user_id}} do
-      conn = delete(conn, user_path(conn, :delete, user_id))
-      assert response(conn, 204)
+    test "deletes chosen user", %{conn: conn, current_user: %{id: user_id} = current_user} do
+      conn = get(conn, user_path(conn, :show, user_id))
 
-      assert {:error, :user_not_found} == Auth.get_user(user_id)
+      assert json_response(conn, 200)["data"] == %{
+               "id" => user_id,
+               "email" => current_user.email,
+               "is_active" => current_user.is_active
+             }
+
+      conn = delete(conn, user_path(conn, :delete, user_id))
+
+      conn = get(conn, user_path(conn, :show, user_id))
+
+      assert json_response(conn, 401) == %{"errors" => %{"detail" => "Unauthenticated user"}}
+    end
+
+    test "returns error in case user has accounts ", %{conn: conn, current_user: %{id: user_id}} do
+      insert(:account, user_id: user_id)
+      conn = delete(conn, user_path(conn, :delete, user_id))
+      assert json_response(conn, 400) == %{"errors" => "user_has_accounts"}
     end
 
     test "returns unauthorized when user cannot operate on given user_id", %{

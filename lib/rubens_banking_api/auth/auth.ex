@@ -50,7 +50,13 @@ defmodule RubensBankingApi.Auth do
           {:ok, User.t()} | {:error, reason :: any()}
   def delete_user(id) do
     with {:ok, user} <- get_user(id) do
-      UsersRepository.delete(user)
+      case Enum.empty?(user.accounts) do
+        true ->
+          UsersRepository.delete(user)
+
+        false ->
+          {:error, :user_has_accounts}
+      end
     end
   end
 
