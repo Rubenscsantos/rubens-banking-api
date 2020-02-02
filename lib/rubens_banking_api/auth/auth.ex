@@ -11,6 +11,13 @@ defmodule RubensBankingApi.Auth do
     UsersRepository.get_all()
   end
 
+  @spec list_user_accounts(id :: String.t()) :: list(accounts :: String.t())
+  def list_user_accounts(id) do
+    with {:ok, user} <- get_user(id) do
+      user.accounts
+    end
+  end
+
   @spec get_user(id :: String.t()) ::
           {:error, :user_not_found} | {:ok, User.t()}
   def get_user(id) when not is_nil(id) do

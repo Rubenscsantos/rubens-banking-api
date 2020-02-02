@@ -4,6 +4,8 @@ defmodule RubensBankingApiWeb.UserControllerTest do
   alias RubensBankingApi.Auth
   alias RubensBankingApi.Auth.User
 
+  import RubensBankingApi.Factories.Factory
+
   alias Plug.Test
 
   @create_attrs %{email: "some email", password: "some password"}
@@ -35,14 +37,31 @@ defmodule RubensBankingApiWeb.UserControllerTest do
   end
 
   describe "index" do
-    test "lists all users", %{conn: conn, current_user: current_user} do
+    test "lists all of current user's accounts", %{conn: conn, current_user: current_user} do
+      %{account_code: account_code_1, document: document_1} =
+        insert(:account, user_id: current_user.id)
+
+      %{account_code: account_code_2, document: document_2} =
+        insert(:account, user_id: current_user.id)
+
       conn = get(conn, user_path(conn, :index))
 
       assert json_response(conn, 200)["data"] == [
                %{
-                 "id" => current_user.id,
-                 "email" => current_user.email,
-                 "is_active" => current_user.is_active
+                 "account_code" => account_code_2,
+                 "balance" => "R$1000,00",
+                 "document" => document_2,
+                 "document_type" => "RG",
+                 "owner_name" => "Rubens",
+                 "status" => "open"
+               },
+               %{
+                 "account_code" => account_code_1,
+                 "balance" => "R$1000,00",
+                 "document" => document_1,
+                 "document_type" => "RG",
+                 "owner_name" => "Rubens",
+                 "status" => "open"
                }
              ]
     end
@@ -50,10 +69,6 @@ defmodule RubensBankingApiWeb.UserControllerTest do
 
   describe "create user" do
     test "renders user when data is valid", %{conn: conn} do
-      conn = get(conn, user_path(conn, :index))
-
-      json_response(conn, 200)["data"]
-
       conn =
         post(
           conn,
@@ -62,6 +77,15 @@ defmodule RubensBankingApiWeb.UserControllerTest do
         )
 
       assert %{"id" => id} = json_response(conn, 201)["data"]
+
+      conn =
+        post(
+          conn,
+          user_path(conn, :sign_in, %{
+            email: @create_attrs.email,
+            password: @create_attrs.password
+          })
+        )
 
       conn = get(conn, user_path(conn, :show, id))
 
@@ -78,10 +102,33 @@ defmodule RubensBankingApiWeb.UserControllerTest do
     end
   end
 
+  describe "get user" do
+    setup [:create_user]
+
+    test "returns user", %{conn: conn, current_user: %{id: id} = current_user} do
+      conn = get(conn, user_path(conn, :show, id))
+
+      assert json_response(conn, 200)["data"] == %{
+               "id" => id,
+               "email" => current_user.email,
+               "is_active" => current_user.is_active
+             }
+    end
+
+    test "returns unauthorized when user cannot operate on given user_id", %{
+      conn: conn,
+      user: %{id: id}
+    } do
+      conn = get(conn, user_path(conn, :show, id))
+
+      assert json_response(conn, 401) == %{"errors" => %{"detail" => "Unauthorized"}}
+    end
+  end
+
   describe "update user" do
     setup [:create_user]
 
-    test "renders user when data is valid", %{conn: conn, user: %User{id: id} = user} do
+    test "renders user when data is valid", %{conn: conn, current_user: %User{id: id} = user} do
       conn = put(conn, user_path(conn, :update, user), user: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
@@ -94,27 +141,37 @@ defmodule RubensBankingApiWeb.UserControllerTest do
              }
     end
 
-    test "renders errors when data is invalid", %{conn: conn, user: user} do
+    test "renders errors when data is invalid", %{conn: conn, current_user: user} do
       conn = put(conn, user_path(conn, :update, user), user: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
+    end
+
+    test "returns unauthorized when user cannot operate on given user_id", %{
+      conn: conn,
+      user: user
+    } do
+      conn = put(conn, user_path(conn, :update, user), user: @update_attrs)
+
+      assert json_response(conn, 401) == %{"errors" => %{"detail" => "Unauthorized"}}
     end
   end
 
   describe "delete user" do
     setup [:create_user]
 
-    test "deletes chosen user", %{conn: conn, user: %{id: user_id} = user} do
+    test "deletes chosen user", %{conn: conn, current_user: %{id: user_id}} do
       conn = delete(conn, user_path(conn, :delete, user_id))
       assert response(conn, 204)
 
-      conn = get(conn, user_path(conn, :show, user))
+      assert {:error, :user_not_found} == Auth.get_user(user_id)
+    end
 
-      response =
-        conn
-        |> get(user_path(conn, :show, user))
-        |> json_response(400)
-
-      assert %{"errors" => "user_not_found"} == response
+    test "returns unauthorized when user cannot operate on given user_id", %{
+      conn: conn,
+      user: %{id: user_id}
+    } do
+      conn = delete(conn, user_path(conn, :delete, user_id))
+      assert json_response(conn, 401) == %{"errors" => %{"detail" => "Unauthorized"}}
     end
   end
 

@@ -33,9 +33,14 @@ defmodule RubensBankingApiWeb.Router do
       post("/get_report", AccountTransactionController, :get_report)
     end
 
+    post("/users", UserController, :create)
+    post("/sign_in", UserController, :sign_in)
+
     scope "/users" do
-      resources("/", UserController, except: [:new, :edit])
-      post("/sign_in", UserController, :sign_in)
+      pipe_through([:api_auth])
+
+      resources("/", UserController, except: [:create, :new, :edit])
+      # get("/accounts", UserController, :accounts)
     end
   end
 

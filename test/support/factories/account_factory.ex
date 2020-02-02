@@ -13,7 +13,7 @@ defmodule RubensBankingApi.Factories.AccountFactory do
           balance: 100_000,
           owner_name: "Rubens",
           document_type: "RG",
-          document: "1234554321",
+          document: Factory.generate_account_document(),
           status: "open"
         }
       end

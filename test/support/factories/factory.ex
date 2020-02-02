@@ -10,4 +10,10 @@ defmodule RubensBankingApi.Factories.Factory do
     |> Enum.random()
     |> to_string()
   end
+
+  def generate_account_document do
+    10_000_000_000..99_999_999_999
+    |> Enum.random()
+    |> to_string()
+  end
 end
