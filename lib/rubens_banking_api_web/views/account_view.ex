@@ -1,8 +1,6 @@
 defmodule RubensBankingApiWeb.AccountView do
   use RubensBankingApiWeb, :view
 
-  import RubensBankingApi.Helpers.MoneyHelper
-
   def render("show.json", %{account: account}) do
     %{data: render("account.json", %{account: account})}
   end
@@ -15,9 +13,9 @@ defmodule RubensBankingApiWeb.AccountView do
 
   def render("account.json", %{account: account}) do
     %{
-      id: account.id,
+      account_code: account.account_code,
       owner_name: account.owner_name,
-      balance: convert_amount(account.balance),
+      balance: account.balance,
       document: account.document,
       document_type: account.document_type,
       status: account.status
@@ -27,10 +25,10 @@ defmodule RubensBankingApiWeb.AccountView do
   def render("account_transaction.json", %{account_transaction: account_transaction}) do
     %{
       id: account_transaction.id,
-      transaction_starter_account_id: account_transaction.transaction_starter_account_id,
-      receiver_account_id: account_transaction.receiver_account_id,
+      transaction_starter_account_code: account_transaction.transaction_starter_account_code,
+      receiver_account_code: account_transaction.receiver_account_code,
       transaction_type: account_transaction.transaction_type,
-      amount: convert_amount(account_transaction.amount)
+      amount: account_transaction.amount
     }
   end
 end

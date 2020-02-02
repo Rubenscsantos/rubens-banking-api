@@ -5,17 +5,34 @@ defmodule RubensBankingApi.Accounts.AccountsRepository do
   alias RubensBankingApi.Accounts.Account
   alias RubensBankingApi.Repo
 
+  alias RubensBankingApi.Helpers.AccountHelper
+
   import Ecto.Query
 
   @spec create(params :: map()) :: {:ok, Account.t()} | {:error, reason :: %Ecto.Changeset{}}
-  def create(params) do
+  def create(%{"account_code" => _account_code} = params) do
+    case do_create(params) do
+      {:error, :account_code_taken} ->
+        params
+        |> update_in([:account_code], nil)
+        |> create()
+
+      response ->
+        response
+    end
+  end
+
+  def create(params),
+    do: put_in(params, ["account_code"], AccountHelper.generate_account_code()) |> create()
+
+  defp do_create(params) do
     %Account{} |> Account.create_account(params) |> Repo.insert()
   end
 
-  @spec get(id :: term()) ::
+  @spec get(account_code :: term()) ::
           {:ok, %Account{}} | {:error, :account_not_found} | {:error, reason :: term()}
-  def get(id) do
-    query = from(a in Account, where: a.id == ^id)
+  def get(account_code) do
+    query = from(a in Account, where: a.account_code == ^account_code)
 
     case Repo.one(query) do
       nil -> {:error, :account_not_found}

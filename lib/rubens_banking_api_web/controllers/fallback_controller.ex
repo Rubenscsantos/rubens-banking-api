@@ -17,4 +17,11 @@ defmodule RubensBankingApiWeb.FallbackController do
     |> put_status(400)
     |> render(RubensBankingApiWeb.ErrorView, "errors.json", %{errors: reason})
   end
+
+  def call(conn, false) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(RubensBankingApiWeb.ErrorView)
+    |> render("401.json")
+  end
 end

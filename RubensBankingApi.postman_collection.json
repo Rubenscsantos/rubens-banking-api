@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "db15240b-f680-45c6-b675-73e12fe5c640",
+		"_postman_id": "f6e20c22-8d85-45ab-be93-c1126df1ea1a",
 		"name": "RubensBankingApi",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -242,7 +242,7 @@
 									}
 								},
 								"url": {
-									"raw": "localhost:4000/api/v1/users/sign_in",
+									"raw": "localhost:4000/api/v1/sign_in",
 									"host": [
 										"localhost"
 									],
@@ -250,7 +250,6 @@
 									"path": [
 										"api",
 										"v1",
-										"users",
 										"sign_in"
 									]
 								}

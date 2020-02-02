@@ -24,15 +24,20 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
   end
 
   describe "get_report/1" do
-    test "successfully generates report with one transaction", %{conn: conn} do
+    test "successfully generates report with one transaction", %{
+      conn: conn,
+      current_user: %{id: user_id}
+    } do
+      %{account_code: transaction_starter_account_code} = insert(:account, user_id: user_id)
+
       account_transaction_1 =
         insert(:account_transaction,
-          transaction_starter_account_id: 1500,
+          transaction_starter_account_code: transaction_starter_account_code,
           transaction_type: "open account",
           amount: "100000"
         )
 
-      params = %{account_id: "1500", report_period: "day"}
+      params = %{account_code: transaction_starter_account_code, report_period: "day"}
 
       response =
         conn
@@ -42,26 +47,31 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
       assert %{
                "data" => [
                  %{
-                   "amount" => MoneyHelper.convert_amount(account_transaction_1.amount),
+                   "amount" => account_transaction_1.amount,
                    "id" => account_transaction_1.id,
-                   "receiver_account_id" => account_transaction_1.receiver_account_id,
-                   "transaction_starter_account_id" =>
-                     account_transaction_1.transaction_starter_account_id,
+                   "receiver_account_code" => account_transaction_1.receiver_account_code,
+                   "transaction_starter_account_code" =>
+                     account_transaction_1.transaction_starter_account_code,
                    "transaction_type" => account_transaction_1.transaction_type
                  }
                ]
              } == response
     end
 
-    test "successfully generates report when transaction does not have amount", %{conn: conn} do
+    test "successfully generates report when transaction does not have amount", %{
+      conn: conn,
+      current_user: %{id: user_id}
+    } do
+      %{account_code: transaction_starter_account_code} = insert(:account, user_id: user_id)
+
       account_transaction_1 =
         insert(:account_transaction,
-          transaction_starter_account_id: 1500,
+          transaction_starter_account_code: transaction_starter_account_code,
           transaction_type: "close account",
           amount: nil
         )
 
-      params = %{account_id: "1500", report_period: "day"}
+      params = %{account_code: transaction_starter_account_code, report_period: "day"}
 
       response =
         conn
@@ -72,38 +82,43 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
                "data" => [
                  %{
                    "id" => account_transaction_1.id,
-                   "receiver_account_id" => account_transaction_1.receiver_account_id,
-                   "transaction_starter_account_id" =>
-                     account_transaction_1.transaction_starter_account_id,
+                   "receiver_account_code" => account_transaction_1.receiver_account_code,
+                   "transaction_starter_account_code" =>
+                     account_transaction_1.transaction_starter_account_code,
                    "transaction_type" => account_transaction_1.transaction_type
                  }
                ]
              } == response
     end
 
-    test "successfully generates report with multiple transactions", %{conn: conn} do
+    test "successfully generates report with multiple transactions", %{
+      conn: conn,
+      current_user: %{id: user_id}
+    } do
+      %{account_code: transaction_starter_account_code} = insert(:account, user_id: user_id)
+
       account_transaction_1 =
         insert(:account_transaction,
-          transaction_starter_account_id: 1500,
+          transaction_starter_account_code: transaction_starter_account_code,
           transaction_type: "open account",
           amount: "100000"
         )
 
       account_transaction_2 =
         insert(:account_transaction,
-          transaction_starter_account_id: 1500,
+          transaction_starter_account_code: transaction_starter_account_code,
           transaction_type: "withdraw",
           amount: "25000"
         )
 
       account_transaction_3 =
         insert(:account_transaction,
-          receiver_account_id: 1500,
+          receiver_account_code: transaction_starter_account_code,
           transaction_type: "transfer_money",
           amount: "10000"
         )
 
-      params = %{account_id: "1500", report_period: "day"}
+      params = %{account_code: transaction_starter_account_code, report_period: "day"}
 
       response =
         conn
@@ -113,27 +128,27 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
       assert %{
                "data" => [
                  %{
-                   "amount" => MoneyHelper.convert_amount(account_transaction_1.amount),
+                   "amount" => account_transaction_1.amount,
                    "id" => account_transaction_1.id,
-                   "receiver_account_id" => account_transaction_1.receiver_account_id,
-                   "transaction_starter_account_id" =>
-                     account_transaction_1.transaction_starter_account_id,
+                   "receiver_account_code" => account_transaction_1.receiver_account_code,
+                   "transaction_starter_account_code" =>
+                     account_transaction_1.transaction_starter_account_code,
                    "transaction_type" => account_transaction_1.transaction_type
                  },
                  %{
-                   "amount" => MoneyHelper.convert_amount(account_transaction_2.amount),
+                   "amount" => account_transaction_2.amount,
                    "id" => account_transaction_2.id,
-                   "receiver_account_id" => account_transaction_2.receiver_account_id,
-                   "transaction_starter_account_id" =>
-                     account_transaction_2.transaction_starter_account_id,
+                   "receiver_account_code" => account_transaction_2.receiver_account_code,
+                   "transaction_starter_account_code" =>
+                     account_transaction_2.transaction_starter_account_code,
                    "transaction_type" => account_transaction_2.transaction_type
                  },
                  %{
-                   "amount" => MoneyHelper.convert_amount(account_transaction_3.amount),
+                   "amount" => account_transaction_3.amount,
                    "id" => account_transaction_3.id,
-                   "receiver_account_id" => account_transaction_3.receiver_account_id,
-                   "transaction_starter_account_id" =>
-                     account_transaction_3.transaction_starter_account_id,
+                   "receiver_account_code" => account_transaction_3.receiver_account_code,
+                   "transaction_starter_account_code" =>
+                     account_transaction_3.transaction_starter_account_code,
                    "transaction_type" => account_transaction_3.transaction_type
                  }
                ]

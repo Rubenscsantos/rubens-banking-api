@@ -43,3 +43,5 @@ Run the `docker-compose up --build` command to start the application.
 When it's up you can use Postman to make requests to `http://localhost:4000`.
 
 The Postman collection is divided in folders, in order to be able to make the requests in the `Account` and `AccountTransaction` folders you need to be authenticated. You can do that by doing the POST request inside the `User` folder to create a new User, then doing the POST request inside the `Authentication` folder in order to Sign In.
+
+After successfully signing in for the first time, the only operation available will be `Create Account`, after an account is created it will be linked to the logged in user. Other operations will then be permitted that have this account as the `Operation Starter`.

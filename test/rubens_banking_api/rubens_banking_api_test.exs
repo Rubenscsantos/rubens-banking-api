@@ -4,6 +4,8 @@ defmodule RubensBankingApiTest do
   alias RubensBankingApi.Accounts.{Account, AccountsRepository}
   alias RubensBankingApi.AccountTransactions.{AccountTransaction, AccountTransactionsRepository}
 
+  alias RubensBankingApi.Helpers.AccountHelper
+
   import ExUnit.CaptureLog
 
   setup do
@@ -25,18 +27,18 @@ defmodule RubensBankingApiTest do
 
       assert {:ok,
               %Account{
-                id: account_id,
+                account_code: account_code,
                 balance: amount
               }} = RubensBankingApi.create_new_account(params)
 
       assert {:ok,
               [
                 %AccountTransaction{
-                  transaction_starter_account_id: ^account_id,
+                  transaction_starter_account_code: ^account_code,
                   transaction_type: "open account",
                   amount: ^amount
                 }
-              ]} = AccountTransactionsRepository.generate_report(account_id, :total)
+              ]} = AccountTransactionsRepository.generate_report(account_code, :total)
     end
 
     test "returns error when create_account fails" do
@@ -64,57 +66,47 @@ defmodule RubensBankingApiTest do
 
   describe "transfer_money/1" do
     test "successfully transfers money from transaction starter to receiver" do
-      %{id: transaction_starter_account_id} = insert(:account, owner_name: "Grimes")
-      %{id: receiver_account_id} = insert(:account, owner_name: "Tyler")
+      %{account_code: transaction_starter_account_code} = insert(:account, owner_name: "Grimes")
+      %{account_code: receiver_account_code} = insert(:account, owner_name: "Tyler")
 
       params = %{
-        "transaction_starter_account_id" => transaction_starter_account_id,
-        "receiver_account_id" => receiver_account_id,
+        "transaction_starter_account_code" => transaction_starter_account_code,
+        "receiver_account_code" => receiver_account_code,
         "amount" => "5000"
       }
 
       assert capture_log([level: :info], fn ->
                assert {:ok,
                        %AccountTransaction{
-                         transaction_starter_account_id: ^transaction_starter_account_id,
-                         receiver_account_id: ^receiver_account_id,
+                         transaction_starter_account_code: ^transaction_starter_account_code,
+                         receiver_account_code: ^receiver_account_code,
                          amount: 5000,
                          transaction_type: "transfer money"
                        }} = RubensBankingApi.transfer_money(params)
-             end) =~ "Successfully transfered R$50,00 from Grimes's account to Tyler's account"
+             end) =~ "Successfully transfered money"
     end
 
     test "returns error in case the transaction starter does not have enought money to transfer" do
-      %{id: transaction_starter_account_id} = insert(:account, owner_name: "Snoop")
-      %{id: receiver_account_id} = insert(:account, owner_name: "Gambino")
+      %{account_code: transaction_starter_account_code} = insert(:account, owner_name: "Snoop")
+      %{account_code: receiver_account_code} = insert(:account, owner_name: "Gambino")
 
       params = %{
-        "transaction_starter_account_id" => transaction_starter_account_id,
-        "receiver_account_id" => receiver_account_id,
+        "transaction_starter_account_code" => transaction_starter_account_code,
+        "receiver_account_code" => receiver_account_code,
         "amount" => "150000"
       }
 
       assert capture_log([level: :error], fn ->
-               assert {:error,
-                       %Ecto.Changeset{
-                         action: :update,
-                         changes: %{balance: -50_000},
-                         errors: [
-                           balance:
-                             {"must be greater than or equal to %{number}",
-                              [validation: :number, number: 0]}
-                         ],
-                         valid?: false
-                       }} = RubensBankingApi.transfer_money(params)
-             end) =~ "Failed to transfer money in update_transaction_starter_balance"
+               assert {:error, :amount_is_too_large} = RubensBankingApi.transfer_money(params)
+             end) =~ "Failed to transfer money due to amount being too large"
     end
 
     test "returns error when trying to transfer a non-integer amount" do
       assert capture_log([level: :error], fn ->
                assert {:error, :amount_is_not_integer} ==
                         RubensBankingApi.transfer_money(%{
-                          "transaction_starter_account_id" => "123",
-                          "receiver_account_id" => "456",
+                          "transaction_starter_account_code" => "123",
+                          "receiver_account_code" => "456",
                           "amount" => "non-integer"
                         })
              end) =~ "Failed to transfer money due to amount not being an integer"
@@ -129,21 +121,21 @@ defmodule RubensBankingApiTest do
 
   describe "withdraw/1" do
     test "successfully withdraws money from account" do
-      %{id: account_id} = insert(:account, owner_name: "MFDOOM")
-      params = %{"account_id" => account_id, "amount" => "25000"}
+      %{account_code: account_code} = insert(:account, owner_name: "MFDOOM")
+      params = %{"account_code" => account_code, "amount" => "25000"}
 
       assert capture_log([level: :info], fn ->
                assert {:ok,
                        %Account{
-                         id: ^account_id,
+                         account_code: ^account_code,
                          balance: 75_000
                        }} = RubensBankingApi.withdraw(params)
-             end) =~ "Successfully withdrew R$250,00 from MFDOOM's account"
+             end) =~ "Successfully withdrew"
     end
 
     test "returns error in case the account does not have enought money to withdraw" do
-      %{id: account_id} = insert(:account, owner_name: "MFDOOM")
-      params = %{"account_id" => account_id, "amount" => "250000"}
+      %{account_code: account_code} = insert(:account, owner_name: "MFDOOM")
+      params = %{"account_code" => account_code, "amount" => "250000"}
 
       assert capture_log([level: :error], fn ->
                assert {:error,
@@ -164,7 +156,7 @@ defmodule RubensBankingApiTest do
       assert capture_log([level: :error], fn ->
                assert {:error, :amount_is_not_integer} ==
                         RubensBankingApi.withdraw(%{
-                          "account_id" => "123",
+                          "account_code" => "123",
                           "amount" => "non-integer"
                         })
              end) =~ "Failed to withdraw due to amount not being an integer"
@@ -179,23 +171,23 @@ defmodule RubensBankingApiTest do
 
   describe "close_account/1" do
     test "successfully closes account" do
-      %{id: account_id} = insert(:account, owner_name: "Biggie")
+      %{account_code: account_code} = insert(:account, owner_name: "Biggie")
 
       capture_log([level: :info], fn ->
         assert {:ok,
                 %Account{
                   owner_name: "Biggie",
                   status: "closed"
-                }} = RubensBankingApi.close_account(%{"account_id" => account_id})
+                }} = RubensBankingApi.close_account(%{"account_code" => account_code})
       end) =~ "Successfully closed Biggie's account"
     end
 
     test "returns error in case account is already closed" do
-      %{id: account_id} = insert(:account, status: "closed")
+      %{account_code: account_code} = insert(:account, status: "closed")
 
       capture_log([level: :error], fn ->
         assert {:error, :account_is_already_closed} =
-                 RubensBankingApi.close_account(%{"account_id" => account_id})
+                 RubensBankingApi.close_account(%{"account_code" => account_code})
       end) =~ "Failed to close account in close_account"
     end
 
@@ -203,7 +195,7 @@ defmodule RubensBankingApiTest do
       capture_log([level: :error], fn ->
         assert {:error, :account_not_found} =
                  RubensBankingApi.close_account(%{
-                   "account_id" => Enum.random(50_000..1_000_000_000)
+                   "account_code" => AccountHelper.generate_account_code()
                  })
       end) =~ "Failed to close account in get_account"
     end

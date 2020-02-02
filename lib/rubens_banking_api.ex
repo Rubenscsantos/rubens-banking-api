@@ -17,8 +17,6 @@ defmodule RubensBankingApi do
   defdelegate get_account(id), to: Accounts
   defdelegate get_report(report_params), to: AccountTransactions
 
-  alias RubensBankingApi.Helpers.MoneyHelper
-
   alias Ecto.Multi
 
   def create_new_account(
@@ -28,6 +26,7 @@ defmodule RubensBankingApi do
     Multi.new()
     |> Multi.run(:generate_new_account_params, fn _changes ->
       new_account_params = params |> Map.put("status", "open") |> Map.put("balance", 100_000)
+
       {:ok, new_account_params}
     end)
     |> Multi.run(:create_account, fn %{generate_new_account_params: new_account_params} ->
@@ -35,13 +34,13 @@ defmodule RubensBankingApi do
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             create_account: %{
-                                                              id: account_id,
+                                                              account_code: account_code,
                                                               balance: amount
                                                             }
                                                           } ->
       {:ok,
        %{
-         transaction_starter_account_id: account_id,
+         transaction_starter_account_code: account_code,
          amount: amount,
          transaction_type: "open account"
        }}
@@ -59,8 +58,9 @@ defmodule RubensBankingApi do
         {:ok, account}
 
       {:error, operation_identifier, reason, _changes} ->
-        Logger.error("Failed to create account in #{operation_identifier}",
-          error: inspect(reason)
+        log_error(
+          "Failed to create account in #{operation_identifier}",
+          reason
         )
 
         {:error, reason}
@@ -68,20 +68,24 @@ defmodule RubensBankingApi do
   end
 
   def create_new_account(_params) do
-    Logger.error("Failed to create account due to missing parameters")
+    log_error("Failed to create account due to missing parameters", :missing_parameters)
     {:error, :missing_parameters}
   end
 
   def transfer_money(%{
-        "transaction_starter_account_id" => transaction_starter_account_id,
-        "receiver_account_id" => receiver_account_id,
+        "transaction_starter_account_code" => transaction_starter_account_code,
+        "receiver_account_code" => receiver_account_code,
         "amount" => amount
       }) do
     Multi.new()
     |> Multi.run(:check_amount, fn _changes ->
       case Integer.parse(amount) do
         :error ->
-          Logger.error("Failed to transfer money due to amount not being an integer")
+          log_error(
+            "Failed to transfer money due to amount not being an integer",
+            :amount_is_not_integer
+          )
+
           {:error, :amount_is_not_integer}
 
         {amount, _base} ->
@@ -89,10 +93,10 @@ defmodule RubensBankingApi do
       end
     end)
     |> Multi.run(:get_transaction_starter_account, fn _changes ->
-      Accounts.get_account(transaction_starter_account_id)
+      Accounts.get_account(transaction_starter_account_code)
     end)
     |> Multi.run(:get_receiver_account, fn _changes ->
-      Accounts.get_account(receiver_account_id)
+      Accounts.get_account(receiver_account_code)
     end)
     |> Multi.run(:update_transaction_starter_balance, fn %{
                                                            get_transaction_starter_account:
@@ -110,16 +114,17 @@ defmodule RubensBankingApi do
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             get_transaction_starter_account: %{
-                                                              id: transaction_starter_account_id
+                                                              account_code:
+                                                                transaction_starter_account_code
                                                             },
                                                             get_receiver_account: %{
-                                                              id: receiver_account_id
+                                                              account_code: receiver_account_code
                                                             }
                                                           } ->
       {:ok,
        %{
-         transaction_starter_account_id: transaction_starter_account_id,
-         receiver_account_id: receiver_account_id,
+         transaction_starter_account_code: transaction_starter_account_code,
+         receiver_account_code: receiver_account_code,
          amount: amount,
          transaction_type: "transfer money"
        }}
@@ -134,38 +139,45 @@ defmodule RubensBankingApi do
     |> case do
       {:ok,
        %{
-         create_transfer_money_account_transaction: account_transaction,
-         get_transaction_starter_account: %{owner_name: transaction_starter_owner_name},
-         get_receiver_account: %{owner_name: receiver_owner_name}
+         create_transfer_money_account_transaction: account_transaction
        }} ->
-        Logger.info(
-          "Successfully transfered #{MoneyHelper.convert_amount(amount)} from #{
-            transaction_starter_owner_name
-          }'s account to #{receiver_owner_name}'s account"
-        )
+        Logger.info("Successfully transfered money")
 
         {:ok, account_transaction}
 
+      {:error, :update_transaction_starter_balance,
+       %Ecto.Changeset{
+         errors: [
+           balance:
+             {"must be greater than or equal to %{number}", [validation: :number, number: 0]}
+         ]
+       }, _changes} ->
+        log_error("Failed to transfer money due to amount being too large", :amount_is_too_large)
+
+        {:error, :amount_is_too_large}
+
       {:error, operation_identifier, reason, _changes} ->
-        Logger.error("Failed to transfer money in #{operation_identifier}",
-          error: inspect(reason)
-        )
+        log_error("Failed to transfer money in #{operation_identifier}", reason)
 
         {:error, reason}
     end
   end
 
   def transfer_money(_params) do
-    Logger.error("Failed to transfer money due to missing parameters")
+    log_error("Failed to transfer money due to missing parameters", :missing_parameters)
     {:error, :missing_parameters}
   end
 
-  def withdraw(%{"account_id" => account_id, "amount" => amount}) do
+  def withdraw(%{"account_code" => account_code, "amount" => amount}) do
     Multi.new()
     |> Multi.run(:check_amount, fn _changes ->
       case Integer.parse(amount) do
         :error ->
-          Logger.error("Failed to withdraw due to amount not being an integer")
+          log_error(
+            "Failed to withdraw due to amount not being an integer",
+            :amount_is_not_integer
+          )
+
           {:error, :amount_is_not_integer}
 
         {amount, _base} ->
@@ -173,7 +185,7 @@ defmodule RubensBankingApi do
       end
     end)
     |> Multi.run(:get_account, fn _changes ->
-      Accounts.get_account(account_id)
+      Accounts.get_account(account_code)
     end)
     |> Multi.run(:update_account, fn %{
                                        get_account: %{balance: balance} = account,
@@ -181,23 +193,20 @@ defmodule RubensBankingApi do
                                      } ->
       Accounts.update_account_balance(account, %{balance: balance - amount})
     end)
-    |> Multi.run(:notify_account_owner, fn %{check_amount: amount} ->
-      Logger.info(
-        "Successfully sent email to account owner notifying the withdraw of #{
-          MoneyHelper.convert_amount(amount)
-        }"
-      )
+    |> Multi.run(:notify_account_owner, fn _ ->
+      Logger.info("Successfully sent email to account owner notifying the withdraw")
 
       {:ok, :ok}
     end)
     |> Multi.run(:generate_account_transaction_params, fn %{
                                                             get_account: %{
-                                                              id: transaction_starter_account_id
+                                                              account_code:
+                                                                transaction_starter_account_code
                                                             }
                                                           } ->
       {:ok,
        %{
-         transaction_starter_account_id: transaction_starter_account_id,
+         transaction_starter_account_code: transaction_starter_account_code,
          amount: amount,
          transaction_type: "withdraw"
        }}
@@ -212,17 +221,16 @@ defmodule RubensBankingApi do
     |> case do
       {:ok,
        %{
-         update_account: %{owner_name: account_owner_name} = account
+         update_account: account
        }} ->
-        Logger.info(
-          "Successfully withdrew #{MoneyHelper.convert_amount(amount)} from #{account_owner_name}'s account"
-        )
+        Logger.info("Successfully withdrew")
 
         {:ok, account}
 
       {:error, operation_identifier, reason, _changes} ->
-        Logger.error("Failed to withdraw in #{operation_identifier}",
-          error: inspect(reason)
+        log_error(
+          "Failed to withdraw in #{operation_identifier}",
+          reason
         )
 
         {:error, reason}
@@ -230,20 +238,24 @@ defmodule RubensBankingApi do
   end
 
   def withdraw(_params) do
-    Logger.error("Failed to withdraw due to missing parameters")
+    log_error("Failed to withdraw due to missing parameters", :missing_parameters)
     {:error, :missing_parameters}
   end
 
-  def close_account(%{"account_id" => account_id}) do
+  def close_account(%{"account_code" => account_code}) do
     Multi.new()
     |> Multi.run(:get_account, fn _changes ->
-      Accounts.get_account(account_id)
+      Accounts.get_account(account_code)
     end)
     |> Multi.run(:close_account, fn %{get_account: account} ->
       Accounts.close_account(account)
     end)
-    |> Multi.run(:generate_account_transaction_params, fn %{get_account: %{id: account_id}} ->
-      {:ok, %{transaction_starter_account_id: account_id, transaction_type: "close account"}}
+    |> Multi.run(:generate_account_transaction_params, fn %{
+                                                            get_account: %{
+                                                              account_code: account_code
+                                                            }
+                                                          } ->
+      {:ok, %{transaction_starter_account_code: account_code, transaction_type: "close account"}}
     end)
     |> Multi.run(:create_close_account_account_transaction, fn %{
                                                                  generate_account_transaction_params:
@@ -257,21 +269,21 @@ defmodule RubensBankingApi do
        %{
          close_account: account
        }} ->
-        Logger.info("Successfully closed #{account.owner_name}'s account")
+        Logger.info("Successfully closed account")
 
         {:ok, account}
 
       {:error, operation_identifier, reason, _changes} ->
-        Logger.error("Failed to close account in #{operation_identifier}",
-          error: inspect(reason)
-        )
+        log_error("Failed to close account in #{operation_identifier}", reason)
 
         {:error, reason}
     end
   end
 
   def close_account(_params) do
-    Logger.error("Failed to close account due to missing parameters")
+    log_error("Failed to close account due to missing parameters", :missing_parameters)
     {:error, :missing_parameters}
   end
+
+  defp log_error(message, reason), do: Logger.error(message, error: inspect(reason))
 end

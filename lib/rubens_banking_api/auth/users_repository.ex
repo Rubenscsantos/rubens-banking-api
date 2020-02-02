@@ -21,7 +21,7 @@ defmodule RubensBankingApi.Auth.UsersRepository do
 
     case Repo.one(query) do
       nil -> {:error, :user_not_found}
-      user -> {:ok, user}
+      user -> {:ok, Repo.preload(user, [:accounts])}
     end
   end
 

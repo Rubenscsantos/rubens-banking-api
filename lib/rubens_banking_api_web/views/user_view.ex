@@ -1,9 +1,9 @@
 defmodule RubensBankingApiWeb.UserView do
   use RubensBankingApiWeb, :view
-  alias RubensBankingApiWeb.UserView
+  alias RubensBankingApiWeb.{AccountView, UserView}
 
-  def render("index.json", %{users: users}) do
-    %{data: render_many(users, UserView, "user.json")}
+  def render("index.json", %{accounts: accounts}) do
+    %{data: render_many(accounts, AccountView, "account.json")}
   end
 
   def render("show.json", %{user: user}) do
