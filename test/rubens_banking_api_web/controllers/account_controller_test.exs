@@ -64,7 +64,7 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
       %{account_code: account_code, balance: balance} =
         account = insert(:account, user_id: current_user_id)
 
-      converted_balance = MoneyHelper.convert_amount(balance)
+      converted_balance = balance
 
       response =
         conn
@@ -105,7 +105,7 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
       response =
         conn
         |> post(account_path(conn, :close, account_code))
-        |> json_response(201)
+        |> json_response(200)
 
       assert %{
                "data" => %{
@@ -157,7 +157,7 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
       response =
         conn
         |> post(account_path(conn, :withdraw, params))
-        |> json_response(201)
+        |> json_response(200)
 
       assert %{
                "data" => %{
@@ -217,12 +217,12 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
         amount: 25_000
       }
 
-      converted_amount = MoneyHelper.convert_amount(25_000)
+      converted_amount = 25_000
 
       response =
         conn
         |> post(account_path(conn, :transfer_money, params))
-        |> json_response(201)
+        |> json_response(200)
 
       assert %{
                "data" => %{
@@ -253,9 +253,9 @@ defmodule RubensBankingApiWeb.AccountControllerTest do
       response =
         conn
         |> post(account_path(conn, :transfer_money, params))
-        |> json_response(422)
+        |> json_response(400)
 
-      assert %{"errors" => %{"balance" => ["must be greater than or equal to 0"]}} == response
+      assert %{"errors" => "amount_is_too_large"} == response
     end
 
     test "returns error when account was already closed", %{

@@ -71,10 +71,12 @@ defmodule RubensBankingApi.Auth do
   def authorize_operation(id, account_code) do
     with {:ok, user} <- get_user(id),
          accounts <- Map.get(user, :accounts) do
-      case Enum.find(accounts, fn account -> account.account_code == account_code end) do
-        nil -> {:error, :unauthorized_operation}
-        _account -> {:ok, :authorized_operation}
-      end
+      accounts
+      |> Enum.find(fn account -> account.account_code == account_code end)
+      |> handle_comparison()
     end
   end
+
+  defp handle_comparison(nil), do: {:error, :unauthorized_operation}
+  defp handle_comparison(_), do: {:ok, :authorized_operation}
 end

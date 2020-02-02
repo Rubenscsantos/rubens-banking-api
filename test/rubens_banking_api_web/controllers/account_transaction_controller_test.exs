@@ -47,7 +47,7 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
       assert %{
                "data" => [
                  %{
-                   "amount" => MoneyHelper.convert_amount(account_transaction_1.amount),
+                   "amount" => account_transaction_1.amount,
                    "id" => account_transaction_1.id,
                    "receiver_account_code" => account_transaction_1.receiver_account_code,
                    "transaction_starter_account_code" =>
@@ -128,7 +128,7 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
       assert %{
                "data" => [
                  %{
-                   "amount" => MoneyHelper.convert_amount(account_transaction_1.amount),
+                   "amount" => account_transaction_1.amount,
                    "id" => account_transaction_1.id,
                    "receiver_account_code" => account_transaction_1.receiver_account_code,
                    "transaction_starter_account_code" =>
@@ -136,7 +136,7 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
                    "transaction_type" => account_transaction_1.transaction_type
                  },
                  %{
-                   "amount" => MoneyHelper.convert_amount(account_transaction_2.amount),
+                   "amount" => account_transaction_2.amount,
                    "id" => account_transaction_2.id,
                    "receiver_account_code" => account_transaction_2.receiver_account_code,
                    "transaction_starter_account_code" =>
@@ -144,7 +144,7 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
                    "transaction_type" => account_transaction_2.transaction_type
                  },
                  %{
-                   "amount" => MoneyHelper.convert_amount(account_transaction_3.amount),
+                   "amount" => account_transaction_3.amount,
                    "id" => account_transaction_3.id,
                    "receiver_account_code" => account_transaction_3.receiver_account_code,
                    "transaction_starter_account_code" =>

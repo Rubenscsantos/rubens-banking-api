@@ -35,7 +35,7 @@ defmodule RubensBankingApiWeb.AccountController do
     with {:ok, :authorized_operation} <- Auth.authorize_operation(user_id, account_code),
          {:ok, account} <- RubensBankingApi.close_account(account_params) do
       conn
-      |> put_status(201)
+      |> put_status(200)
       |> render("show.json", account: account)
     end
   end
@@ -47,7 +47,7 @@ defmodule RubensBankingApiWeb.AccountController do
     with {:ok, :authorized_operation} <- Auth.authorize_operation(user_id, account_code),
          {:ok, account} <- RubensBankingApi.withdraw(account_params) do
       conn
-      |> put_status(201)
+      |> put_status(200)
       |> render("show.json", account: account)
     end
   end
@@ -59,7 +59,7 @@ defmodule RubensBankingApiWeb.AccountController do
     with {:ok, :authorized_operation} <- Auth.authorize_operation(user_id, account_code),
          {:ok, account_transaction} <- RubensBankingApi.transfer_money(account_params) do
       conn
-      |> put_status(201)
+      |> put_status(200)
       |> render("show.json", account_transaction: account_transaction)
     end
   end

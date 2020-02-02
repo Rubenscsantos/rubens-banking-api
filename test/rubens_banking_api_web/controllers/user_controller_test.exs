@@ -49,7 +49,7 @@ defmodule RubensBankingApiWeb.UserControllerTest do
       assert json_response(conn, 200)["data"] == [
                %{
                  "account_code" => account_code_2,
-                 "balance" => "R$1000,00",
+                 "balance" => 100_000,
                  "document" => document_2,
                  "document_type" => "RG",
                  "owner_name" => "Rubens",
@@ -57,7 +57,7 @@ defmodule RubensBankingApiWeb.UserControllerTest do
                },
                %{
                  "account_code" => account_code_1,
-                 "balance" => "R$1000,00",
+                 "balance" => 100_000,
                  "document" => document_1,
                  "document_type" => "RG",
                  "owner_name" => "Rubens",

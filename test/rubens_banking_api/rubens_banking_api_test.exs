@@ -83,7 +83,7 @@ defmodule RubensBankingApiTest do
                          amount: 5000,
                          transaction_type: "transfer money"
                        }} = RubensBankingApi.transfer_money(params)
-             end) =~ "Successfully transfered R$50,00 from Grimes's account to Tyler's account"
+             end) =~ "Successfully transfered money"
     end
 
     test "returns error in case the transaction starter does not have enought money to transfer" do
@@ -97,18 +97,8 @@ defmodule RubensBankingApiTest do
       }
 
       assert capture_log([level: :error], fn ->
-               assert {:error,
-                       %Ecto.Changeset{
-                         action: :update,
-                         changes: %{balance: -50_000},
-                         errors: [
-                           balance:
-                             {"must be greater than or equal to %{number}",
-                              [validation: :number, number: 0]}
-                         ],
-                         valid?: false
-                       }} = RubensBankingApi.transfer_money(params)
-             end) =~ "Failed to transfer money in update_transaction_starter_balance"
+               assert {:error, :amount_is_too_large} = RubensBankingApi.transfer_money(params)
+             end) =~ "Failed to transfer money due to amount being too large"
     end
 
     test "returns error when trying to transfer a non-integer amount" do
@@ -140,7 +130,7 @@ defmodule RubensBankingApiTest do
                          account_code: ^account_code,
                          balance: 75_000
                        }} = RubensBankingApi.withdraw(params)
-             end) =~ "Successfully withdrew R$250,00 from MFDOOM's account"
+             end) =~ "Successfully withdrew"
     end
 
     test "returns error in case the account does not have enought money to withdraw" do
