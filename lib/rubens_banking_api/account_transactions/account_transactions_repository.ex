@@ -36,8 +36,14 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
     |> generate_query(account_code, today)
     |> Repo.all()
     |> case do
-      [] -> {:ok, []}
-      payments -> {:ok, payments}
+      [] ->
+        {:ok, []}
+
+      payments ->
+        {:ok,
+         Enum.map(payments, fn payment ->
+           payment |> Repo.preload([:transaction_starter_account, :receiver_account])
+         end)}
     end
   end
 

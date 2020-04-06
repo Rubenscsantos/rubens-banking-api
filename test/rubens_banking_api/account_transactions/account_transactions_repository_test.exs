@@ -39,8 +39,10 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   describe "create/1 when transaction_type = 'open account'" do
     test "successfully creates an account transaction" do
+      %{account_code: transaction_starter_account_code} = insert(:account)
+
       params = %{
-        transaction_starter_account_code: Factory.generate_account_code(),
+        transaction_starter_account_code: transaction_starter_account_code,
         transaction_type: "open account",
         amount: 100_000
       }
@@ -55,8 +57,10 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   describe "create/1 when transaction_type = 'close_account'" do
     test "successfully creates an account transaction" do
+      %{account_code: transaction_starter_account_code} = insert(:account)
+
       params = %{
-        transaction_starter_account_code: Factory.generate_account_code(),
+        transaction_starter_account_code: transaction_starter_account_code,
         transaction_type: "close account"
       }
 
@@ -70,9 +74,12 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   describe "create/1 when transaction_type = 'transfer_money'" do
     test "successfully creates an account transaction" do
+      %{account_code: transaction_starter_account_code} = insert(:account)
+      %{account_code: receiver_account_code} = insert(:account)
+
       params = %{
-        transaction_starter_account_code: Factory.generate_account_code(),
-        receiver_account_code: Factory.generate_account_code(),
+        transaction_starter_account_code: transaction_starter_account_code,
+        receiver_account_code: receiver_account_code,
         transaction_type: "transfer money",
         amount: Enum.random(1..500_000)
       }
@@ -87,8 +94,10 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   describe "create/1 when transaction_type = 'withdraw'" do
     test "successfully creates an account transaction" do
+      %{account_code: account_code} = insert(:account)
+
       params = %{
-        transaction_starter_account_code: Factory.generate_account_code(),
+        transaction_starter_account_code: account_code,
         transaction_type: "withdraw",
         amount: Enum.random(1..500_000)
       }
@@ -116,7 +125,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   describe "generate_report/2 for last day" do
     test "successfullt return a list of all transactions done by an account in the last day" do
-      %{account_code: account_code} = build(:account)
+      %{account_code: account_code} = insert(:account)
       now = NaiveDateTime.utc_now()
 
       insert_pair(:account_transaction, transaction_starter_account_code: account_code)
@@ -142,8 +151,8 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
   end
 
   describe "generate_report/2 for last week" do
-    test "successfullt return a list of all transactions done by an account in the last week" do
-      %{account_code: account_code} = build(:account)
+    test "successfully return a list of all transactions done by an account in the last week" do
+      %{account_code: account_code} = insert(:account)
       now = NaiveDateTime.utc_now()
 
       insert_pair(:account_transaction, transaction_starter_account_code: account_code)
@@ -169,8 +178,8 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
   end
 
   describe "generate_report/2 for last month" do
-    test "successfullt return a list of all transactions done by an account in the last month" do
-      %{account_code: account_code} = build(:account)
+    test "successfully return a list of all transactions done by an account in the last month" do
+      %{account_code: account_code} = insert(:account)
       now = NaiveDateTime.utc_now()
 
       insert_pair(:account_transaction,
@@ -200,7 +209,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   describe "generate_report/2 for last year" do
     test "successfullt return a list of all transactions done by an account in the last year" do
-      %{account_code: account_code} = build(:account)
+      %{account_code: account_code} = insert(:account)
       now = NaiveDateTime.utc_now()
 
       insert_pair(:account_transaction, transaction_starter_account_code: account_code)
@@ -227,7 +236,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   describe "generate_report/2 for all time" do
     test "successfullt return a list of all transactions done by an account" do
-      %{account_code: account_code} = build(:account)
+      %{account_code: account_code} = insert(:account)
       now = NaiveDateTime.utc_now()
 
       insert_pair(:account_transaction, transaction_starter_account_code: account_code)
@@ -258,7 +267,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
 
   describe "generate_report/2" do
     test "successfully returns a list of all transactions done by an account if they are either transaction starters or receivers" do
-      %{account_code: account_code} = build(:account)
+      %{account_code: account_code} = insert(:account)
 
       insert_pair(:account_transaction, transaction_starter_account_code: account_code)
       insert(:account_transaction, receiver_account_code: account_code)
@@ -281,7 +290,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepositoryTest
     end
 
     test "successfully returns a list of all transactions by an account even if transaction types are different" do
-      %{account_code: account_code} = build(:account)
+      %{account_code: account_code} = insert(:account)
 
       insert(:account_transaction,
         transaction_starter_account_code: account_code,

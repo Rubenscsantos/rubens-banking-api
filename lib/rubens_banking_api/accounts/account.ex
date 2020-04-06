@@ -17,6 +17,18 @@ defmodule RubensBankingApi.Accounts.Account do
 
     belongs_to(:user, RubensBankingApi.Users.User, type: :binary_id)
 
+    has_many(
+      :transaction_starter_account_transactions,
+      RubensBankingApi.AccountTransactions.AccountTransaction,
+      foreign_key: :transaction_starter_account_code
+    )
+
+    has_many(
+      :receiver_account_transactions,
+      RubensBankingApi.AccountTransactions.AccountTransaction,
+      foreign_key: :receiver_account_code
+    )
+
     timestamps()
   end
 

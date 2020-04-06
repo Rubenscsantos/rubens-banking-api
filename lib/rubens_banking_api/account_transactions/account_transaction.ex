@@ -12,10 +12,20 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
   @primary_key {:id, :binary_id, autogenerate: true}
 
   schema "account_transactions" do
-    field(:transaction_starter_account_code, :string)
-    field(:receiver_account_code, :string)
     field(:transaction_type, :string)
     field(:amount, :integer)
+
+    belongs_to(:transaction_starter_account, RubensBankingApi.Accounts.Account,
+      foreign_key: :transaction_starter_account_code,
+      references: :account_code,
+      type: :string
+    )
+
+    belongs_to(:receiver_account, RubensBankingApi.Accounts.Account,
+      foreign_key: :receiver_account_code,
+      references: :account_code,
+      type: :string
+    )
 
     timestamps()
   end
@@ -30,6 +40,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
     ])
     |> validate_required([:transaction_type])
     |> validate_requirements(Map.get(attrs, :transaction_type))
+    |> foreign_key_constraint(:account_transactions_transaction_starter_account_code_fkey)
   end
 
   defp validate_requirements(changeset, "open account") do
@@ -49,6 +60,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransaction do
       :receiver_account_code,
       :amount
     ])
+    |> foreign_key_constraint(:account_transactions_receiver_account_code_fkey)
   end
 
   defp validate_requirements(changeset, "withdraw") do
