@@ -40,10 +40,7 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
         {:ok, []}
 
       payments ->
-        {:ok,
-         Enum.map(payments, fn payment ->
-           payment |> Repo.preload([:transaction_starter_account, :receiver_account])
-         end)}
+        {:ok, payments}
     end
   end
 
