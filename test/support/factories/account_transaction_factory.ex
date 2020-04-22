@@ -9,8 +9,6 @@ defmodule RubensBankingApi.Factories.AccountTransactionFactory do
 
       def account_transaction_factory do
         %AccountTransaction{
-          transaction_starter_account_code: Factory.generate_account_code(),
-          receiver_account_code: Factory.generate_account_code(),
           transaction_type: "transfer money",
           amount: Enum.random(1..500_000)
         }

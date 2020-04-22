@@ -36,8 +36,11 @@ defmodule RubensBankingApi.AccountTransactions.AccountTransactionsRepository do
     |> generate_query(account_code, today)
     |> Repo.all()
     |> case do
-      [] -> {:ok, []}
-      payments -> {:ok, payments}
+      [] ->
+        {:ok, []}
+
+      payments ->
+        {:ok, payments}
     end
   end
 

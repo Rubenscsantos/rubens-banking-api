@@ -3,7 +3,7 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
 
   import RubensBankingApi.Factories.Factory
 
-  alias RubensBankingApi.Auth
+  alias RubensBankingApi.{Auth, Repo}
 
   alias Plug.Test
 
@@ -33,9 +33,11 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
       account_transaction_1 =
         insert(:account_transaction,
           transaction_starter_account_code: transaction_starter_account_code,
+          receiver_account_code: nil,
           transaction_type: "open account",
           amount: "100000"
         )
+        |> Repo.preload([:transaction_starter_account, :receiver_account])
 
       params = %{account_code: transaction_starter_account_code, report_period: "day"}
 
@@ -96,6 +98,7 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
       current_user: %{id: user_id}
     } do
       %{account_code: transaction_starter_account_code} = insert(:account, user_id: user_id)
+      %{account_code: receiver_account_code} = insert(:account)
 
       account_transaction_1 =
         insert(:account_transaction,
@@ -113,7 +116,8 @@ defmodule RubensBankingApiWeb.AccountTransactionControllerTest do
 
       account_transaction_3 =
         insert(:account_transaction,
-          receiver_account_code: transaction_starter_account_code,
+          transaction_starter_account_code: transaction_starter_account_code,
+          receiver_account_code: receiver_account_code,
           transaction_type: "transfer_money",
           amount: "10000"
         )
